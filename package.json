@@ -1,0 +1,37 @@
+{
+  "name": "ktx2-glb-optimizer",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "copy-wasm": "node -e \"const fs = require('fs'); if (!fs.existsSync('public')) fs.mkdirSync('public'); fs.copyFileSync('node_modules/draco3d/draco_encoder.wasm', 'public/draco_encoder.wasm'); fs.copyFileSync('node_modules/draco3d/draco_decoder.wasm', 'public/draco_decoder.wasm'); fs.copyFileSync('node_modules/draco3d/draco_encoder.wasm', 'public/draco_encoder_gltf.wasm'); fs.copyFileSync('node_modules/draco3d/draco_decoder.wasm', 'public/draco_decoder_gltf.wasm');\"",
+    "predev": "npm run copy-wasm",
+    "dev": "vite",
+    "prebuild": "npm run copy-wasm",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@gltf-transform/core": "^4.1.1",
+    "@gltf-transform/extensions": "^4.1.1",
+    "@gltf-transform/functions": "^4.1.1",
+    "@react-three/drei": "^9.121.5",
+    "@react-three/fiber": "^8.18.0",
+    "draco3d": "^1.5.7",
+    "lucide-react": "^0.475.0",
+    "r3f-perf": "^7.2.3",
+    "r3f-webgpu-perf": "^0.1.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.174.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@types/three": "^0.174.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.0"
+  }
+}

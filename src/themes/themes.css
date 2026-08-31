@@ -1,0 +1,1413 @@
+/* ═══════════════════════════════════════════════════════════
+   THEME SYSTEM — 6 Visual Styles with 4 Palettes Each
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Google Fonts for themed typography ─────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Rajdhani:wght@600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
+
+/* ════════════════════════════════════════════════════
+   PALETTES: DEFAULT SKEUOMORPHISM CONVEX
+   ════════════════════════════════════════════════════ */
+.palette-classic {
+  --bg-dark:   #07090f;
+  --bg-panel:  #0c1018;
+  --bg-card:   #111622;
+  --bg-raised: #16202f;
+  --amber: #f59e0b;
+  --gold: #fbbf24;
+  --cyan: #00e5ff;
+}
+.palette-emerald {
+  --bg-dark:   #04120c;
+  --bg-panel:  #081c13;
+  --bg-card:   #0d281b;
+  --bg-raised: #153a27;
+  --amber: #10b981;
+  --gold: #34d399;
+  --cyan: #6ee7b7;
+}
+.palette-crimson {
+  --bg-dark:   #15050b;
+  --bg-panel:  #200912;
+  --bg-card:   #2d0d1a;
+  --bg-raised: #3d1324;
+  --amber: #f43f5e;
+  --gold: #fb7185;
+  --cyan: #fda4af;
+}
+.palette-bronze {
+  --bg-dark:   #140a04;
+  --bg-panel:  #1d1007;
+  --bg-card:   #29180b;
+  --bg-raised: #3a2210;
+  --amber: #d97706;
+  --gold: #f59e0b;
+  --cyan: #fbbf24;
+}
+
+/* ════════════════════════════════════════════════════
+   THEME 1: CYBERPUNK 2077
+   Neon yellow on void-black, angular glows, scanlines
+   ════════════════════════════════════════════════════ */
+.theme-cyberpunk {
+  --bg-dark:   #050010;
+  --bg-panel:  #0a0022;
+  --bg-card:   #10002e;
+  --bg-raised: #1a0040;
+  --border-hi:  rgba(252,238,9,0.3);
+  --border-lo:  rgba(255,0,60,0.4);
+  --cyan:    #fcee09;   /* CP2077 signature neon yellow */
+  --emerald: #39ff14;   /* neon green */
+  --amber:   #ff003c;   /* hot red/pink */
+  --gold:    #ff00ff;   /* magenta */
+  --txt:     #ece8ff;
+  --muted:   #6644aa;
+  --font-ui: 'Share Tech Mono', 'Courier New', monospace;
+  --font-hd: 'Rajdhani', 'Impact', sans-serif;
+  --convex-shadow:
+    0 0 12px rgba(252,238,9,0.3),
+    0 0 4px  rgba(252,238,9,0.6),
+    inset 0 1px 0 rgba(252,238,9,0.2);
+  --convex-shadow-sm:
+    0 0 6px rgba(252,238,9,0.2),
+    inset 0 1px 0 rgba(252,238,9,0.15);
+}
+
+/* Palettes for Cyberpunk */
+.theme-cyberpunk.palette-yellow-pink {
+  --bg-dark:   #050010;
+  --bg-panel:  #0c0024;
+  --bg-card:   #140038;
+  --bg-raised: #1f0052;
+  --cyan: #fcee09;
+  --amber: #ff003c;
+  --gold: #ff00ff;
+  --emerald: #39ff14;
+}
+.theme-cyberpunk.palette-netrunner {
+  --bg-dark:   #000c0f;
+  --bg-panel:  #00181e;
+  --bg-card:   #002932;
+  --bg-raised: #003e4b;
+  --cyan: #00f0ff;
+  --amber: #39ff14;
+  --gold: #00ffaa;
+  --emerald: #fcee09;
+}
+.theme-cyberpunk.palette-synthwave {
+  --bg-dark:   #0f0015;
+  --bg-panel:  #1d0028;
+  --bg-card:   #2c003d;
+  --bg-raised: #3f0057;
+  --cyan: #00ffff;
+  --amber: #ff007f;
+  --gold: #a855f7;
+  --emerald: #f43f5e;
+}
+.theme-cyberpunk.palette-arasaka {
+  --bg-dark:   #120202;
+  --bg-panel:  #1d0404;
+  --bg-card:   #2a0707;
+  --bg-raised: #3d0c0c;
+  --cyan: #ffffff;
+  --amber: #ff1122;
+  --gold: #cbd5e1;
+  --emerald: #94a3b8;
+}
+
+/* Scanline overlay on entire page */
+.theme-cyberpunk::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.18) 2px,
+    rgba(0,0,0,0.18) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+  animation: scanScroll 8s linear infinite;
+}
+@keyframes scanScroll {
+  from { background-position: 0 0; }
+  to   { background-position: 0 100px; }
+}
+
+.theme-cyberpunk .skeuo-panel {
+  background: linear-gradient(180deg, #0c0028 0%, #060015 100%);
+  border-color: rgba(252,238,9,0.25);
+  box-shadow:
+    inset 0 1px 0 rgba(252,238,9,0.15),
+    0 0 20px rgba(252,238,9,0.08);
+}
+
+.theme-cyberpunk .skeuo-card {
+  background: linear-gradient(175deg, #150038 0%, #0a001f 100%);
+  border: 1px solid rgba(252,238,9,0.2);
+  border-bottom-color: rgba(255,0,60,0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(252,238,9,0.12),
+    0 0 10px rgba(252,238,9,0.08),
+    0 2px 6px rgba(0,0,0,0.7);
+}
+.theme-cyberpunk .skeuo-card:hover {
+  border-color: rgba(252,238,9,0.6);
+  box-shadow:
+    inset 0 1px 0 rgba(252,238,9,0.25),
+    0 0 18px rgba(252,238,9,0.3),
+    0 2px 8px rgba(0,0,0,0.8);
+  transform: translateY(-1px);
+}
+
+.theme-cyberpunk .section-title-skeuo {
+  background: linear-gradient(180deg, #130035 0%, #080019 100%);
+  border-top-color: rgba(252,238,9,0.2);
+  color: var(--cyan);
+  letter-spacing: 0.08em;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  box-shadow: inset 0 1px 0 rgba(252,238,9,0.1), 0 0 8px rgba(252,238,9,0.05);
+}
+.theme-cyberpunk .section-title-skeuo:hover { color: var(--amber); }
+
+.theme-cyberpunk .btn-convex {
+  background: var(--cyan);
+  color: #050010;
+  border: 1px solid var(--cyan);
+  border-bottom: 2px solid rgba(0,0,0,0.5);
+  border-radius: 2px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  box-shadow: 0 0 14px var(--cyan), 0 0 4px var(--cyan);
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+}
+.theme-cyberpunk .btn-convex:hover:not(:disabled) {
+  filter: brightness(1.2);
+  box-shadow: 0 0 24px var(--cyan), 0 0 50px var(--cyan);
+}
+
+.theme-cyberpunk .btn-convex-warm {
+  background: var(--amber);
+  color: #fff;
+  border: 1px solid var(--amber);
+  border-bottom: 2px solid rgba(0,0,0,0.6);
+  border-radius: 2px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  box-shadow: 0 0 14px var(--amber), 0 0 4px var(--amber);
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+}
+
+.theme-cyberpunk .btn-convex-secondary {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--cyan);
+  border-radius: 2px;
+  color: var(--cyan);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  box-shadow: 0 0 6px rgba(0,0,0,0.4);
+}
+.theme-cyberpunk .btn-convex-secondary:hover {
+  border-color: #ffffff;
+  background: rgba(255,255,255,0.14);
+  box-shadow: 0 0 12px var(--cyan);
+  color: #ffffff;
+}
+
+.theme-cyberpunk .tab-group-skeuo {
+  background: #050010;
+  border-color: rgba(252,238,9,0.2);
+}
+.theme-cyberpunk .tab-btn-skeuo.active,
+.theme-cyberpunk .tab-btn-skeuo.active-warm {
+  background: rgba(252,238,9,0.12);
+  color: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan);
+}
+
+.theme-cyberpunk .skeuo-select {
+  background: #0a0022;
+  border-color: var(--cyan);
+  color: var(--cyan);
+  font-family: 'Share Tech Mono', monospace;
+  border-radius: 2px;
+}
+
+.theme-cyberpunk .skeuo-slider::-webkit-slider-thumb {
+  background: var(--cyan);
+  border: 1px solid #fff;
+  box-shadow: 0 0 10px var(--cyan);
+}
+
+.theme-cyberpunk .perf-panel {
+  background: #0d0030 !important;
+  border: 1px solid var(--cyan) !important;
+  border-bottom: 2px solid var(--amber) !important;
+  border-radius: 2px !important;
+  box-shadow: 0 0 14px rgba(252,238,9,0.3), 0 0 4px rgba(252,238,9,0.7) !important;
+  font-family: 'Share Tech Mono', monospace !important;
+}
+.theme-cyberpunk .perf-panel:before {
+  background: linear-gradient(90deg, var(--cyan) 0%, var(--amber) 100%) !important;
+  height: 2px !important;
+}
+.theme-cyberpunk .perf-metric-value.fps {
+  color: var(--cyan) !important;
+  text-shadow: 0 0 8px var(--cyan) !important;
+}
+.theme-cyberpunk .perf-metric-value.gpu {
+  color: var(--amber) !important;
+  text-shadow: 0 0 8px var(--amber) !important;
+}
+.theme-cyberpunk .perf-metric-value.cpu {
+  color: var(--emerald) !important;
+}
+.theme-cyberpunk .perf-icon-btn,
+.theme-cyberpunk .perf-theme-btn {
+  background: rgba(255,255,255,0.08) !important;
+  border: 1px solid var(--cyan) !important;
+  border-radius: 2px !important;
+  color: var(--cyan) !important;
+}
+
+
+/* ════════════════════════════════════════════════════
+   THEME 2: BRUTALISM / JET SET RADIO (Enhanced Contrast)
+   Ultra-crisp legibility, bold street art graffiti blocks,
+   thick solid black 2.5px borders, offset shadows
+   ════════════════════════════════════════════════════ */
+.theme-brutalist {
+  --bg-dark:   #f4f4f0;   /* Clean light warm gray */
+  --bg-panel:  #ffe600;   /* Tag yellow panel */
+  --bg-card:   #ffffff;   /* Pure stark white cards */
+  --bg-raised: #ffffff;
+  --border-hi:  #000000;
+  --border-lo:  #000000;
+  --cyan:    #0066ff;   /* bold cobalt */
+  --emerald: #00aa44;   /* vivid lime */
+  --amber:   #ff0055;   /* hot graffiti pink */
+  --gold:    #ff5500;   /* electric orange */
+  --txt:     #000000;
+  --muted:   #222222;
+  --font-ui: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-hd: 'Bebas Neue', 'Impact', sans-serif;
+  --convex-shadow: 3px 3px 0px #000000;
+  --convex-shadow-sm: 2px 2px 0px #000000;
+}
+
+/* JSR Palettes with High Contrast & Legibility */
+.theme-brutalist.palette-shibuya {
+  --bg-dark: #ffe600;
+  --bg-panel: #ff5500;
+  --cyan: #0066ff;
+  --amber: #ff0055;
+  --emerald: #00aa44;
+  --gold: #ff5500;
+}
+.theme-brutalist.palette-tokyo-cyan {
+  --bg-dark: #00e5ff;
+  --bg-panel: #0055dd;
+  --cyan: #00e5ff;
+  --amber: #ff0066;
+  --emerald: #00dd55;
+  --gold: #ffe600;
+}
+.theme-brutalist.palette-graffiti {
+  --bg-dark: #f0f0e8;
+  --bg-panel: #ffe600;
+  --cyan: #0055ff;
+  --amber: #ff2200;
+  --emerald: #00aa44;
+  --gold: #ffe600;
+}
+.theme-brutalist.palette-poison-jam {
+  --bg-dark: #7700cc;
+  --bg-panel: #550099;
+  --cyan: #00ff99;
+  --amber: #ff0099;
+  --emerald: #00ff99;
+  --gold: #ffe600;
+}
+
+.theme-brutalist .skeuo-panel {
+  background: var(--bg-panel);
+  border: 2.5px solid #000;
+  border-radius: 0;
+  box-shadow: 4px 4px 0 #000;
+  color: #000;
+}
+
+.theme-brutalist .skeuo-card {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 #000000 !important;
+  color: #000000 !important;
+}
+.theme-brutalist .skeuo-card * {
+  color: #000000;
+}
+.theme-brutalist .skeuo-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 #000;
+  border-color: var(--amber) !important;
+}
+
+.theme-brutalist .section-title-skeuo {
+  background: #000000;
+  color: #ffffff;
+  border: none;
+  border-bottom: 2.5px solid #000000;
+  font-family: 'Bebas Neue', 'Impact', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  box-shadow: none;
+}
+.theme-brutalist .section-title-skeuo:hover {
+  background: var(--amber);
+  color: #ffffff;
+}
+
+.theme-brutalist .btn-convex {
+  background: var(--cyan);
+  color: #ffffff;
+  border: 2.5px solid #000;
+  border-radius: 0;
+  font-family: 'Bebas Neue', 'Impact', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: none;
+  box-shadow: 3px 3px 0 #000;
+  clip-path: none;
+}
+.theme-brutalist .btn-convex:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 #000;
+  filter: brightness(1.1);
+}
+.theme-brutalist .btn-convex:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #000;
+}
+
+.theme-brutalist .btn-convex-warm {
+  background: var(--amber);
+  color: #ffffff;
+  border: 2.5px solid #000;
+  border-radius: 0;
+  font-family: 'Bebas Neue', 'Impact', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: none;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.theme-brutalist .btn-convex-secondary {
+  background: #ffffff;
+  color: #000000;
+  border: 2px solid #000;
+  border-radius: 0;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  box-shadow: 2px 2px 0 #000;
+}
+.theme-brutalist .btn-convex-secondary:hover {
+  background: var(--gold);
+  border-color: #000000;
+  color: #000000;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 #000;
+}
+
+.theme-brutalist .skeuo-checkbox {
+  color: #000000;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+.theme-brutalist .skeuo-checkbox input[type="checkbox"] {
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 0;
+  box-shadow: 2px 2px 0 #000;
+}
+.theme-brutalist .skeuo-checkbox input[type="checkbox"]:checked {
+  background: var(--amber);
+  border-color: #000;
+  box-shadow: 2px 2px 0 #000;
+}
+.theme-brutalist .skeuo-checkbox input[type="checkbox"]:checked::after {
+  color: #ffffff;
+}
+
+.theme-brutalist .skeuo-select {
+  background: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 0;
+  color: #000000;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 2px 2px 0 #000;
+}
+
+.theme-brutalist .skeuo-slider {
+  background: #ffffff;
+  border: 2px solid #000;
+  border-radius: 0;
+  box-shadow: none;
+}
+.theme-brutalist .skeuo-slider::-webkit-slider-thumb {
+  background: var(--amber);
+  border: 2px solid #000;
+  border-radius: 0;
+  box-shadow: 2px 2px 0 #000;
+}
+
+.theme-brutalist .tab-group-skeuo {
+  background: #000;
+  border: 2px solid #000;
+  border-radius: 0;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+  gap: 2px;
+}
+.theme-brutalist .tab-btn-skeuo { color: #ffffff; font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.06em; border-radius: 0; }
+.theme-brutalist .tab-btn-skeuo.active,
+.theme-brutalist .tab-btn-skeuo.active-warm {
+  background: var(--gold);
+  color: #000;
+  border: none;
+  box-shadow: none;
+}
+
+.theme-brutalist .warm-glow-badge {
+  background: #ffffff;
+  border: 2px solid #000;
+  color: #000000;
+  border-radius: 0;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  box-shadow: 2px 2px 0 #000;
+}
+.theme-brutalist .glow-dot-warm {
+  background: var(--amber);
+  box-shadow: none;
+  border-radius: 0;
+  width: 7px; height: 7px;
+}
+
+.theme-brutalist .skeuo-modal-container {
+  background: #fff;
+  border: 4px solid #000;
+  border-radius: 0;
+  box-shadow: 8px 8px 0 #000;
+  color: #000;
+}
+
+.theme-brutalist .perf-panel {
+  background: #ffffff !important;
+  border: 2.5px solid #000000 !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 #000000 !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+  color: #000000 !important;
+}
+.theme-brutalist .perf-panel * {
+  color: #000000 !important;
+}
+.theme-brutalist .perf-panel:before {
+  background: var(--amber) !important;
+  height: 3px !important;
+}
+.theme-brutalist .perf-metric-value.fps {
+  color: var(--amber) !important;
+  text-shadow: none !important;
+}
+.theme-brutalist .perf-metric-value.gpu {
+  color: var(--gold) !important;
+}
+.theme-brutalist .perf-metric-value.cpu {
+  color: var(--cyan) !important;
+}
+.theme-brutalist .perf-graph-container {
+  background: #f0f0f0 !important;
+  border: 2px solid #000000 !important;
+  border-radius: 0 !important;
+}
+.theme-brutalist .perf-stats {
+  border-top: 2px solid #000000 !important;
+}
+.theme-brutalist .perf-vram {
+  border-top: 2px solid #000000 !important;
+}
+.theme-brutalist .perf-vram-bar {
+  background: #ffffff !important;
+  border: 1.5px solid #000000 !important;
+  border-radius: 0 !important;
+}
+.theme-brutalist .perf-vram-fill {
+  background: var(--amber) !important;
+  border-radius: 0 !important;
+}
+.theme-brutalist .perf-icon-btn,
+.theme-brutalist .perf-theme-btn {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+  border-radius: 0 !important;
+  color: #000000 !important;
+  box-shadow: 2px 2px 0 #000000 !important;
+}
+
+
+/* ════════════════════════════════════════════════════
+   THEME 3: LIQUID UI
+   Dynamic flowing gradients, vibrant organic colors,
+   soft water-like rounded capsules, glowing neon drops
+   ════════════════════════════════════════════════════ */
+.theme-liquid {
+  --bg-dark:   #060614;
+  --bg-panel:  linear-gradient(180deg, #100e2e 0%, #080718 100%);
+  --bg-card:   linear-gradient(145deg, #1d1845 0%, #0f0c29 100%);
+  --bg-raised: #281f5c;
+  --border-hi:  rgba(255, 75, 145, 0.4);
+  --border-lo:  rgba(121, 40, 202, 0.3);
+  --cyan:    #00f0ff;   /* liquid cyan */
+  --emerald: #00ffaa;   /* seafoam neon */
+  --amber:   #ff4b91;   /* electric pink */
+  --gold:    #c084fc;   /* liquid lavender */
+  --txt:     #f8faff;
+  --muted:   #94a3b8;
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-hd: 'Outfit', sans-serif;
+  --convex-shadow:
+    0 4px 18px rgba(121, 40, 202, 0.28),
+    0 1px 3px rgba(0, 240, 255, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  --convex-shadow-sm:
+    0 2px 8px rgba(121, 40, 202, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Liquid Palettes */
+.theme-liquid.palette-aurora {
+  --cyan: #00f0ff;
+  --amber: #ff4b91;
+  --gold: #c084fc;
+  --bg-dark: #0a0515;
+  --bg-panel: linear-gradient(180deg, rgba(20, 10, 45, 0.6) 0%, rgba(10, 5, 25, 0.6) 100%);
+  --bg-card: linear-gradient(145deg, rgba(30, 15, 65, 0.45) 0%, rgba(15, 8, 35, 0.45) 100%);
+}
+.theme-liquid.palette-ocean-deep {
+  --cyan: #00b4d8;
+  --amber: #0077b6;
+  --gold: #52b788;
+  --bg-dark: #020815;
+  --bg-panel: linear-gradient(180deg, rgba(5, 20, 45, 0.6) 0%, rgba(2, 8, 25, 0.6) 100%);
+  --bg-card: linear-gradient(145deg, rgba(10, 30, 65, 0.45) 0%, rgba(5, 15, 35, 0.45) 100%);
+}
+.theme-liquid.palette-sunset-magma {
+  --cyan: #ffb703;
+  --amber: #ff6b35;
+  --gold: #f72585;
+  --bg-dark: #150505;
+  --bg-panel: linear-gradient(180deg, rgba(45, 10, 10, 0.6) 0%, rgba(25, 5, 5, 0.6) 100%);
+  --bg-card: linear-gradient(145deg, rgba(65, 15, 15, 0.45) 0%, rgba(35, 8, 8, 0.45) 100%);
+}
+.theme-liquid.palette-plasma {
+  --cyan: #4cc9f0;
+  --amber: #b5179e;
+  --gold: #7209b7;
+  --bg-dark: #100515;
+  --bg-panel: linear-gradient(180deg, rgba(35, 10, 45, 0.6) 0%, rgba(20, 5, 25, 0.6) 100%);
+  --bg-card: linear-gradient(145deg, rgba(50, 15, 65, 0.45) 0%, rgba(25, 8, 35, 0.45) 100%);
+}
+
+.theme-liquid .skeuo-panel {
+  background: var(--bg-panel);
+  border-color: rgba(192, 132, 252, 0.2);
+  backdrop-filter: blur(16px) saturate(180%) brightness(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(180%) brightness(1.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 10px 30px rgba(121, 40, 202, 0.15);
+}
+
+.theme-liquid .skeuo-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(192, 132, 252, 0.22);
+  border-radius: 12px;
+  backdrop-filter: blur(12px) saturate(160%) brightness(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(160%) brightness(1.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -2px 10px rgba(255, 255, 255, 0.05),
+    0 4px 16px rgba(121, 40, 202, 0.22),
+    0 1px 4px rgba(0, 0, 0, 0.4);
+}
+.theme-liquid .skeuo-card:hover {
+  border-color: var(--cyan);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 0 20px var(--cyan),
+    0 4px 16px var(--amber);
+  transform: translateY(-2px) scale(1.01);
+}
+
+.theme-liquid .section-title-skeuo {
+  background: linear-gradient(135deg, #211c52 0%, #120e33 100%);
+  border-radius: 8px;
+  margin: 4px 8px;
+  border: 1px solid rgba(255, 75, 145, 0.25);
+  color: var(--cyan);
+  box-shadow: 0 2px 10px rgba(121, 40, 202, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+.theme-liquid .section-title-skeuo:hover {
+  color: var(--amber);
+  border-color: var(--amber);
+}
+
+.theme-liquid .btn-convex {
+  background: linear-gradient(135deg, var(--cyan) 0%, var(--gold) 50%, var(--amber) 100%);
+  background-size: 200% auto;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 20px;
+  font-weight: 800;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 4px 15px rgba(0, 240, 255, 0.4),
+    0 2px 5px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s ease;
+}
+.theme-liquid .btn-convex:hover:not(:disabled) {
+  background-position: right center;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 0 22px var(--amber),
+    0 4px 12px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.theme-liquid .btn-convex-warm {
+  background: linear-gradient(135deg, var(--amber) 0%, #ff8e53 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 20px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 4px 15px var(--amber);
+}
+.theme-liquid .btn-convex-warm:hover:not(:disabled) {
+  box-shadow: 0 0 22px var(--amber);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.theme-liquid .btn-convex-secondary {
+  background: linear-gradient(145deg, #221c54 0%, #120e32 100%);
+  border: 1px solid rgba(192, 132, 252, 0.3);
+  border-radius: 14px;
+  color: #f0f4ff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+.theme-liquid .btn-convex-secondary:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px var(--cyan);
+  color: var(--cyan);
+}
+
+.theme-liquid .skeuo-checkbox input[type="checkbox"]:checked {
+  background: linear-gradient(135deg, var(--amber), var(--cyan));
+  border-radius: 50%;
+  border-color: transparent;
+  box-shadow: 0 0 10px var(--cyan);
+}
+
+.theme-liquid .skeuo-slider::-webkit-slider-thumb {
+  background: linear-gradient(135deg, var(--cyan), var(--amber));
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 14px var(--cyan);
+}
+
+.theme-liquid .perf-panel {
+  background: linear-gradient(145deg, rgba(26, 22, 66, 0.95), rgba(14, 12, 40, 0.95)) !important;
+  border: 1px solid rgba(192, 132, 252, 0.35) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 24px rgba(121, 40, 202, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+.theme-liquid .perf-panel:before {
+  background: linear-gradient(90deg, var(--cyan), var(--gold), var(--amber)) !important;
+}
+.theme-liquid .perf-metric-value.fps {
+  color: var(--cyan) !important;
+  text-shadow: 0 0 10px var(--cyan);
+}
+.theme-liquid .perf-metric-value.gpu {
+  color: var(--amber) !important;
+  text-shadow: 0 0 10px var(--amber);
+}
+
+
+/* ════════════════════════════════════════════════════
+   THEME 4: GLASSMORPHISM
+   Ultra-frosted translucent panels, high backdrop-blur,
+   glossy crystal reflections, delicate ice-blue accents
+   ════════════════════════════════════════════════════ */
+.theme-glassmorphism {
+  --bg-dark:   #080e1c;
+  --bg-panel:  rgba(15, 23, 42, 0.6);
+  --bg-card:   rgba(255, 255, 255, 0.04);
+  --bg-raised: rgba(255, 255, 255, 0.08);
+  --border-hi:  rgba(255, 255, 255, 0.25);
+  --border-lo:  rgba(255, 255, 255, 0.08);
+  --cyan:    #38bdf8;   /* ice crystal blue */
+  --emerald: #34d399;   /* mint frost */
+  --amber:   #fb923c;   /* amber crystal */
+  --gold:    #e0e7ff;   /* silver crystal */
+  --txt:     #f8fafc;
+  --muted:   #94a3b8;
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-hd: 'Outfit', sans-serif;
+  --convex-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  --convex-shadow-sm:
+    0 4px 16px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+/* Glassmorphism Palettes */
+.theme-glassmorphism.palette-crystal-ice {
+  --cyan: #38bdf8;
+  --amber: #818cf8;
+  --gold: #e0e7ff;
+  --bg-dark: #080e1c;
+  --bg-panel: rgba(15, 23, 42, 0.55);
+}
+.theme-glassmorphism.palette-emerald-frost {
+  --cyan: #34d399;
+  --amber: #10b981;
+  --gold: #a7f3d0;
+  --bg-dark: #051510;
+  --bg-panel: rgba(10, 30, 20, 0.55);
+}
+.theme-glassmorphism.palette-amethyst {
+  --cyan: #c084fc;
+  --amber: #f472b6;
+  --gold: #e9d5ff;
+  --bg-dark: #120518;
+  --bg-panel: rgba(25, 10, 35, 0.55);
+}
+.theme-glassmorphism.palette-smoked-amber {
+  --cyan: #fbbf24;
+  --amber: #f97316;
+  --gold: #fef08a;
+  --bg-dark: #1a1005;
+  --bg-panel: rgba(35, 20, 10, 0.55);
+}
+
+.theme-glassmorphism .skeuo-panel {
+  background: var(--bg-panel) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 10px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+.theme-glassmorphism .skeuo-card {
+  background: rgba(255, 255, 255, 0.04) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 10px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 8px 24px rgba(0, 0, 0, 0.3) !important;
+}
+.theme-glassmorphism .skeuo-card:hover {
+  border-color: var(--cyan) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 0 20px var(--cyan) !important;
+}
+
+.theme-glassmorphism .section-title-skeuo {
+  background: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(12px) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: var(--cyan) !important;
+}
+
+.theme-glassmorphism .btn-convex {
+  background: linear-gradient(135deg, var(--cyan) 0%, rgba(2, 132, 199, 0.8) 100%) !important;
+  backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 4px 16px rgba(56, 189, 248, 0.35) !important;
+}
+.theme-glassmorphism .btn-convex:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--cyan) 0%, rgba(14, 165, 233, 0.95) 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 0 22px var(--cyan) !important;
+}
+
+.theme-glassmorphism .btn-convex-secondary {
+  background: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #f8fafc !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+}
+.theme-glassmorphism .btn-convex-secondary:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: var(--cyan) !important;
+  box-shadow: 0 0 12px var(--cyan) !important;
+}
+
+.theme-glassmorphism .skeuo-select {
+  background: rgba(15, 23, 42, 0.5) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.theme-glassmorphism .perf-panel {
+  background: rgba(15, 23, 42, 0.65) !important;
+  backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+
+
+/* ════════════════════════════════════════════════════
+   THEME 5: NEUMORPHISM
+   Soft monochromatic clay/plastic extruded surfaces,
+   dual light-source directional shadows, inset pressed states
+   ════════════════════════════════════════════════════ */
+.theme-neumorphism {
+  --bg-dark:   #0d121f;
+  --bg-panel:  #131a2c;
+  --bg-card:   #182137;
+  --bg-raised: #202b46;
+  --border-hi:  rgba(255, 255, 255, 0.08);
+  --border-lo:  rgba(0, 0, 0, 0.65);
+  --cyan:    #38bdf8;
+  --emerald: #34d399;
+  --amber:   #f59e0b;
+  --gold:    #fbbf24;
+  --txt:     #f1f5f9;
+  --muted:   #7d8fa9;
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-hd: 'Outfit', sans-serif;
+  --convex-shadow:
+    -3px -3px 8px rgba(255, 255, 255, 0.07),
+    5px 5px 12px rgba(0, 0, 0, 0.65);
+  --convex-shadow-sm:
+    -2px -2px 6px rgba(255, 255, 255, 0.05),
+    4px 4px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* Neumorphism Palettes - Deeply contrasting & vivid backgrounds */
+.theme-neumorphism.palette-slate-cyan {
+  --bg-dark:   #090d18;
+  --bg-panel:  #0f1728;
+  --bg-card:   #141f36;
+  --bg-raised: #1c2b4a;
+  --cyan: #38bdf8;
+  --amber: #60a5fa;
+  --gold: #93c5fd;
+  --txt: #f8fafc;
+  --muted: #94a3b8;
+}
+.theme-neumorphism.palette-warm-clay {
+  --bg-dark:   #1a0c06;
+  --bg-panel:  #28130a;
+  --bg-card:   #381a0e;
+  --bg-raised: #4d2414;
+  --cyan: #fb923c;
+  --amber: #f97316;
+  --gold: #fde047;
+  --txt: #fff7ed;
+  --muted: #fdba74;
+}
+.theme-neumorphism.palette-forest-mint {
+  --bg-dark:   #03140b;
+  --bg-panel:  #072013;
+  --bg-card:   #0c2d1b;
+  --bg-raised: #143e26;
+  --cyan: #34d399;
+  --amber: #10b981;
+  --gold: #a7f3d0;
+  --txt: #f0fdf4;
+  --muted: #86efac;
+}
+.theme-neumorphism.palette-rose-shadow {
+  --bg-dark:   #18050e;
+  --bg-panel:  #260917;
+  --bg-card:   #350d20;
+  --bg-raised: #49132d;
+  --cyan: #fb7185;
+  --amber: #f43f5e;
+  --gold: #fda4af;
+  --txt: #fff1f2;
+  --muted: #f472b6;
+}
+
+.theme-neumorphism .skeuo-panel {
+  background: var(--bg-panel) !important;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  box-shadow:
+    -4px 0 12px rgba(255, 255, 255, 0.04),
+    6px 0 18px rgba(0, 0, 0, 0.6) !important;
+}
+
+.theme-neumorphism .skeuo-card {
+  background: var(--bg-card) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 9px !important;
+  box-shadow:
+    -3px -3px 8px rgba(255, 255, 255, 0.06),
+    4px 4px 11px rgba(0, 0, 0, 0.65) !important;
+}
+.theme-neumorphism .skeuo-card:hover {
+  box-shadow:
+    -4px -4px 10px rgba(255, 255, 255, 0.09),
+    5px 5px 14px rgba(0, 0, 0, 0.75),
+    0 0 10px var(--cyan) !important;
+  border-color: var(--cyan) !important;
+}
+
+.theme-neumorphism .section-title-skeuo {
+  background: var(--bg-panel) !important;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  box-shadow:
+    inset -2px -2px 5px rgba(255, 255, 255, 0.04),
+    inset 2px 2px 5px rgba(0, 0, 0, 0.5) !important;
+  color: var(--cyan) !important;
+}
+
+.theme-neumorphism .btn-convex {
+  background: linear-gradient(145deg, var(--bg-raised), var(--bg-card)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 8px !important;
+  color: var(--cyan) !important;
+  box-shadow:
+    -3px -3px 7px rgba(255, 255, 255, 0.08),
+    3px 3px 9px rgba(0, 0, 0, 0.7) !important;
+}
+.theme-neumorphism .btn-convex:hover:not(:disabled) {
+  box-shadow:
+    -4px -4px 10px rgba(255, 255, 255, 0.11),
+    4px 4px 12px rgba(0, 0, 0, 0.8),
+    0 0 12px var(--cyan) !important;
+}
+.theme-neumorphism .btn-convex:active:not(:disabled) {
+  box-shadow:
+    inset 2px 2px 5px rgba(0, 0, 0, 0.75),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.05) !important;
+}
+
+.theme-neumorphism .btn-convex-warm {
+  background: linear-gradient(145deg, var(--bg-raised), var(--bg-card)) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  border-radius: 8px !important;
+  color: var(--amber) !important;
+  box-shadow:
+    -3px -3px 7px rgba(255, 255, 255, 0.08),
+    3px 3px 9px rgba(0, 0, 0, 0.7) !important;
+}
+.theme-neumorphism .btn-convex-warm:active:not(:disabled) {
+  box-shadow:
+    inset 2px 2px 5px rgba(0, 0, 0, 0.75),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.05) !important;
+}
+
+.theme-neumorphism .btn-convex-secondary {
+  background: linear-gradient(145deg, var(--bg-raised), var(--bg-card)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 6px !important;
+  box-shadow:
+    -2px -2px 6px rgba(255, 255, 255, 0.06),
+    2px 2px 6px rgba(0, 0, 0, 0.6) !important;
+}
+.theme-neumorphism .btn-convex-secondary:active {
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.7),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.05) !important;
+}
+
+.theme-neumorphism .skeuo-select {
+  background: var(--bg-card) !important;
+  color: var(--txt) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow:
+    inset 2px 2px 5px rgba(0, 0, 0, 0.6),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.05) !important;
+}
+
+.theme-neumorphism .tab-group-skeuo {
+  background: var(--bg-dark) !important;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.7) !important;
+}
+
+.theme-neumorphism .tab-btn-skeuo.active {
+  background: var(--bg-card) !important;
+  box-shadow:
+    -2px -2px 5px rgba(255, 255, 255, 0.06),
+    2px 2px 5px rgba(0, 0, 0, 0.6) !important;
+}
+
+.theme-neumorphism .skeuo-modal-container {
+  background: var(--bg-panel) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+.theme-neumorphism .skeuo-checkbox input[type="checkbox"] {
+  background: var(--bg-dark) !important;
+  border: none !important;
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.75),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.06) !important;
+}
+.theme-neumorphism .skeuo-checkbox input[type="checkbox"]:checked {
+  background: var(--bg-dark) !important;
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.75),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.06),
+    0 0 10px var(--cyan) !important;
+}
+.theme-neumorphism .skeuo-checkbox input[type="checkbox"]:checked::after {
+  color: var(--cyan) !important;
+}
+
+.theme-neumorphism .perf-panel {
+  background: var(--bg-panel) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow:
+    -4px -4px 10px rgba(255, 255, 255, 0.06),
+    5px 5px 14px rgba(0, 0, 0, 0.75) !important;
+}
+
+
+/* ════════════════════════════════════════════════════
+   HIGH CONTRAST SHADOWS (Universal Toggle)
+   Deep pitch-black shadows + bright emboss highlights
+   ════════════════════════════════════════════════════ */
+.high-contrast-shadows {
+  --convex-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 6px 20px rgba(0, 0, 0, 0.92),
+    0 2px 6px rgba(0, 0, 0, 0.75);
+  --convex-shadow-sm:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.85);
+}
+
+.high-contrast-shadows .skeuo-panel {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 10px 35px rgba(0, 0, 0, 0.98),
+    0 2px 10px rgba(0, 0, 0, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+.high-contrast-shadows .skeuo-card {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 6px 20px rgba(0, 0, 0, 0.92),
+    0 2px 7px rgba(0, 0, 0, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+.high-contrast-shadows .btn-convex {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 6px 20px rgba(0, 0, 0, 0.95),
+    0 0 18px var(--cyan) !important;
+}
+
+.high-contrast-shadows .btn-convex-warm {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 6px 20px rgba(0, 0, 0, 0.95),
+    0 0 18px var(--amber) !important;
+}
+
+.high-contrast-shadows .btn-convex-secondary {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 5px 14px rgba(0, 0, 0, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.24) !important;
+}
+
+.high-contrast-shadows .skeuo-modal-container {
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.4),
+    0 40px 100px rgba(0, 0, 0, 0.98),
+    0 0 40px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Extra pronounced Neumorphic 3D Pop with High Contrast */
+.theme-neumorphism.high-contrast-shadows {
+  --convex-shadow:
+    -5px -5px 12px rgba(255, 255, 255, 0.14),
+    8px 8px 20px rgba(0, 0, 0, 0.95);
+  --convex-shadow-sm:
+    -3px -3px 8px rgba(255, 255, 255, 0.12),
+    5px 5px 14px rgba(0, 0, 0, 0.92);
+}
+
+.theme-neumorphism.high-contrast-shadows .skeuo-panel {
+  box-shadow:
+    -6px 0 18px rgba(255, 255, 255, 0.1),
+    12px 0 36px rgba(0, 0, 0, 0.98) !important;
+}
+
+.theme-neumorphism.high-contrast-shadows .skeuo-card {
+  box-shadow:
+    -5px -5px 12px rgba(255, 255, 255, 0.12),
+    7px 7px 18px rgba(0, 0, 0, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.theme-neumorphism.high-contrast-shadows .section-title-skeuo {
+  box-shadow:
+    inset -3px -3px 8px rgba(255, 255, 255, 0.1),
+    inset 4px 4px 10px rgba(0, 0, 0, 0.9) !important;
+}
+
+.theme-neumorphism.high-contrast-shadows .btn-convex {
+  box-shadow:
+    -5px -5px 12px rgba(255, 255, 255, 0.16),
+    6px 6px 16px rgba(0, 0, 0, 0.95),
+    0 0 16px var(--cyan) !important;
+}
+
+.theme-neumorphism.high-contrast-shadows .btn-convex-warm {
+  box-shadow:
+    -5px -5px 12px rgba(255, 255, 255, 0.16),
+    6px 6px 16px rgba(0, 0, 0, 0.95),
+    0 0 16px var(--amber) !important;
+}
+
+.theme-neumorphism.high-contrast-shadows .btn-convex-secondary {
+  box-shadow:
+    -4px -4px 9px rgba(255, 255, 255, 0.12),
+    5px 5px 14px rgba(0, 0, 0, 0.92) !important;
+}
+
+
+/* ── Theme Switcher Widget ─────────────────────────────── */
+.theme-switcher {
+  display: flex;
+  gap: 5px;
+  padding: 8px 10px;
+  background: inherit;
+}
+
+.theme-btn {
+  flex: 1;
+  padding: 5px 3px;
+  border: none;
+  border-radius: 5px;
+  font-size: 9.5px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Default theme button */
+.theme-btn.theme-opt-default {
+  background: linear-gradient(175deg, #1e2d42 0%, #111a28 100%);
+  color: #00e5ff;
+  border: 1px solid rgba(0,229,255,0.3);
+  border-bottom: 2px solid rgba(0,0,0,0.4);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 5px rgba(0,0,0,0.5);
+}
+.theme-btn.theme-opt-default.active,
+.theme-btn.theme-opt-default:hover {
+  background: linear-gradient(175deg,#22d3ee,#0284c7);
+  color: #050d14;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 0 12px rgba(0,229,255,0.45), 0 2px 5px rgba(0,0,0,0.4);
+}
+
+/* Cyberpunk theme button */
+.theme-btn.theme-opt-cyberpunk {
+  background: #050010;
+  color: #fcee09;
+  border: 1px solid rgba(252,238,9,0.4);
+  border-bottom: 2px solid rgba(255,0,60,0.5);
+  box-shadow: 0 0 8px rgba(252,238,9,0.15), 0 2px 5px rgba(0,0,0,0.5);
+  border-radius: 2px;
+}
+.theme-btn.theme-opt-cyberpunk.active,
+.theme-btn.theme-opt-cyberpunk:hover {
+  background: #0d0030;
+  border-color: #fcee09;
+  box-shadow: 0 0 16px rgba(252,238,9,0.5), 0 0 6px rgba(252,238,9,0.8);
+}
+
+/* Brutalist theme button */
+.theme-btn.theme-opt-brutalist {
+  background: #FFD700;
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 0;
+  box-shadow: 2px 2px 0 #000;
+  font-family: 'Bebas Neue', 'Impact', sans-serif;
+  font-size: 10px;
+}
+.theme-btn.theme-opt-brutalist.active,
+.theme-btn.theme-opt-brutalist:hover {
+  background: #FF0080;
+  color: #fff;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 #000;
+}
+
+/* Liquid theme button */
+.theme-btn.theme-opt-liquid {
+  background: linear-gradient(135deg, #1b1646 0%, #0d0b26 100%);
+  color: #ff4b91;
+  border: 1px solid rgba(255, 75, 145, 0.4);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(121, 40, 202, 0.25);
+}
+.theme-btn.theme-opt-liquid.active,
+.theme-btn.theme-opt-liquid:hover {
+  background: linear-gradient(135deg, #ff4b91 0%, #7928ca 50%, #00f0ff 100%);
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(255, 75, 145, 0.6);
+}
+
+/* Glassmorphism theme button */
+.theme-btn.theme-opt-glassmorphism {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  color: #38bdf8;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.theme-btn.theme-opt-glassmorphism.active,
+.theme-btn.theme-opt-glassmorphism:hover {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: #38bdf8;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.5);
+  color: #ffffff;
+}
+
+/* Neumorphism theme button */
+.theme-btn.theme-opt-neumorphism {
+  background: #171c2a;
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  box-shadow:
+    -2px -2px 5px rgba(255, 255, 255, 0.05),
+    2px 2px 5px rgba(0, 0, 0, 0.5);
+}
+.theme-btn.theme-opt-neumorphism.active,
+.theme-btn.theme-opt-neumorphism:hover {
+  color: #38bdf8;
+  box-shadow:
+    inset 1px 1px 3px rgba(0, 0, 0, 0.6),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.05),
+    0 0 8px rgba(56, 189, 248, 0.3);
+}
+
+/* Active indicator dot */
+.theme-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ── Palette Selector Bar (Interactive Swatches) ────────── */
+.palette-selector-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  padding: 6px 8px;
+  margin-top: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.palette-swatch-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--txt);
+}
+.palette-swatch-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--cyan);
+  transform: translateY(-1px);
+}
+.palette-swatch-btn.active {
+  border: 1.5px solid var(--cyan);
+  background: rgba(0, 229, 255, 0.15);
+  box-shadow: 0 0 8px var(--cyan);
+}
+
+.palette-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+}

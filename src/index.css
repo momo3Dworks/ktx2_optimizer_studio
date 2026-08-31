@@ -1,0 +1,575 @@
+/* ── Design Tokens ─────────────────────────────────────────── */
+:root {
+  --bg-dark:   #07090f;
+  --bg-panel:  #0c1018;
+  --bg-card:   #111622;
+  --bg-raised: #16202f;
+
+  --border-hi:  rgba(255,255,255,0.13);
+  --border-lo:  rgba(0,0,0,0.55);
+
+  --cyan:    #00e5ff;
+  --emerald: #10b981;
+  --amber:   #f59e0b;
+  --gold:    #fbbf24;
+
+  --txt:     #eef2f8;
+  --muted:   #64748b;
+
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-hd: 'Outfit', 'Inter', sans-serif;
+
+  /* Convex shadow recipe — raised surface casting shadow downward */
+  --convex-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    0 2px 6px rgba(0,0,0,0.55),
+    0 1px 2px rgba(0,0,0,0.35);
+
+  --convex-shadow-sm:
+    inset 0 1px 0 rgba(255,255,255,0.15),
+    0 1px 4px rgba(0,0,0,0.45);
+}
+
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg-dark);
+  color: var(--txt);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.4;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #1e293b, #0f172a);
+  border-radius: 3px;
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
+
+/* ── Convex Panel (sidebars, header) ───────────────────────── */
+.skeuo-panel {
+  background: linear-gradient(180deg, #10161f 0%, #090d15 100%);
+  border-right: 1px solid rgba(255,255,255,0.08);
+  border-left:  1px solid rgba(255,255,255,0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    0 4px 16px rgba(0,0,0,0.5);
+}
+
+/* ── Convex Card ───────────────────────────────────────────── */
+.skeuo-card {
+  background: linear-gradient(175deg, #18202e 0%, #0f1520 100%);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-bottom-color: rgba(0,0,0,0.5);
+  border-radius: 7px;
+  box-shadow: var(--convex-shadow);
+  transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.12s ease;
+  position: relative;
+}
+
+.skeuo-card:hover {
+  border-color: rgba(0,229,255,0.3);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    0 3px 10px rgba(0,229,255,0.15),
+    0 2px 6px rgba(0,0,0,0.55);
+  transform: translateY(-1px);
+}
+
+/* ── Primary Convex Button (cyan) ──────────────────────────── */
+.btn-convex {
+  background: linear-gradient(175deg, #22d3ee 0%, #0284c7 100%);
+  color: #03111a;
+  font-weight: 800;
+  font-family: var(--font-hd);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+  border: 1px solid rgba(255,255,255,0.35);
+  border-bottom: 2px solid rgba(0,0,0,0.4);
+  border-radius: 7px;
+  padding: 5px 14px;
+  height: 30px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  /* convex: raised with downward shadow */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    0 3px 8px rgba(0,229,255,0.35),
+    0 2px 4px rgba(0,0,0,0.45);
+  transition: all 0.13s ease;
+  white-space: nowrap;
+}
+.btn-convex:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.7),
+    0 0 14px rgba(0,229,255,0.5),
+    0 4px 10px rgba(0,0,0,0.5);
+}
+.btn-convex:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,0.5),
+    0 1px 2px rgba(0,0,0,0.4);
+}
+.btn-convex:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+/* ── Warm Convex Button (amber) ────────────────────────────── */
+.btn-convex-warm {
+  background: linear-gradient(175deg, #fbbf24 0%, #d97706 100%);
+  color: #180e00;
+  font-weight: 800;
+  font-family: var(--font-hd);
+  font-size: 12px;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+  border: 1px solid rgba(255,255,255,0.4);
+  border-bottom: 2px solid rgba(0,0,0,0.45);
+  border-radius: 7px;
+  padding: 5px 14px;
+  height: 30px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    0 3px 8px rgba(245,158,11,0.4),
+    0 2px 4px rgba(0,0,0,0.45);
+  transition: all 0.13s ease;
+  white-space: nowrap;
+}
+.btn-convex-warm:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.8),
+    0 0 16px rgba(251,191,36,0.55),
+    0 4px 10px rgba(0,0,0,0.5);
+}
+.btn-convex-warm:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.4);
+}
+.btn-convex-warm:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── Secondary Convex Button (dark) ────────────────────────── */
+.btn-convex-secondary {
+  background: linear-gradient(175deg, #1e2d42 0%, #111a28 100%);
+  color: var(--txt);
+  font-weight: 600;
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-bottom: 2px solid rgba(0,0,0,0.45);
+  border-radius: 6px;
+  padding: 4px 10px;
+  height: 28px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    0 2px 5px rgba(0,0,0,0.45);
+  transition: all 0.13s ease;
+  white-space: nowrap;
+}
+.btn-convex-secondary:hover {
+  background: linear-gradient(175deg, #263648 0%, #162030 100%);
+  border-color: rgba(0,229,255,0.35);
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.28),
+    0 0 10px rgba(0,229,255,0.2),
+    0 3px 7px rgba(0,0,0,0.45);
+}
+.btn-convex-secondary:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* ── Convex Checkbox ───────────────────────────────────────── */
+.skeuo-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  font-size: 11.5px;
+  color: #c8d4e4;
+  user-select: none;
+}
+.skeuo-checkbox input[type="checkbox"] {
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  /* unchecked = convex pill */
+  background: linear-gradient(175deg, #1e2d42 0%, #111a27 100%);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-bottom: 1px solid rgba(0,0,0,0.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.15),
+    0 1px 3px rgba(0,0,0,0.4);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.skeuo-checkbox input[type="checkbox"]:checked {
+  background: linear-gradient(175deg, #00e5ff 0%, #0284c7 100%);
+  border-color: #38bdf8;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    0 0 8px rgba(0,229,255,0.5),
+    0 1px 3px rgba(0,0,0,0.4);
+}
+.skeuo-checkbox input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -55%);
+  color: #030d14;
+  font-weight: 900;
+  font-size: 10px;
+}
+
+/* ── Convex Range Slider ───────────────────────────────────── */
+.skeuo-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  /* track = concave groove (correct for a rail) */
+  background: linear-gradient(180deg, #060810 0%, #1a2233 100%);
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.7);
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+}
+.skeuo-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  /* thumb = convex dome */
+  background: linear-gradient(155deg, #fde68a 0%, #f59e0b 55%, #b45309 100%);
+  border: 1px solid rgba(255,255,255,0.5);
+  border-bottom: 1px solid rgba(0,0,0,0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.7),
+    0 2px 6px rgba(245,158,11,0.5),
+    0 1px 3px rgba(0,0,0,0.5);
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.skeuo-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.8),
+    0 0 14px rgba(245,158,11,0.7),
+    0 2px 6px rgba(0,0,0,0.5);
+}
+
+/* ── Convex Select ─────────────────────────────────────────── */
+.skeuo-select {
+  background: linear-gradient(175deg, #1a2030 0%, #0e1520 100%);
+  border: 1px solid rgba(255,255,255,0.11);
+  border-bottom: 2px solid rgba(0,0,0,0.5);
+  color: var(--txt);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-family: var(--font-ui);
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+  height: 28px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.13),
+    0 2px 5px rgba(0,0,0,0.4);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.skeuo-select:focus {
+  border-color: var(--amber);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.13),
+    0 0 8px rgba(245,158,11,0.35);
+}
+
+/* ── Accordion Section Header ──────────────────────────────── */
+.section-title-skeuo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px;
+  background: linear-gradient(180deg, #15202e 0%, #0c1420 100%);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(0,0,0,0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    0 2px 4px rgba(0,0,0,0.3);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.03em;
+  color: var(--cyan);
+  transition: background 0.18s, color 0.18s;
+  user-select: none;
+}
+.section-title-skeuo:hover {
+  background: linear-gradient(180deg, #1c2d40 0%, #122033 100%);
+  color: var(--gold);
+}
+
+/* ── Tab Group ─────────────────────────────────────────────── */
+.tab-group-skeuo {
+  display: flex;
+  background: linear-gradient(180deg, #050709 0%, #0d1421 100%);
+  padding: 3px;
+  border-radius: 8px;
+  gap: 3px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.65);
+}
+.tab-btn-skeuo {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+.tab-btn-skeuo.active {
+  background: linear-gradient(175deg, #1a2d40 0%, #0f1e2e 100%);
+  color: var(--cyan);
+  border: 1px solid rgba(0,229,255,0.35);
+  border-bottom: 1px solid rgba(0,229,255,0.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    0 0 8px rgba(0,229,255,0.2);
+}
+.tab-btn-skeuo.active-warm {
+  background: linear-gradient(175deg, #2a1a04 0%, #190f02 100%);
+  color: var(--gold);
+  border: 1px solid rgba(245,158,11,0.4);
+  border-bottom: 1px solid rgba(245,158,11,0.65);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    0 0 8px rgba(245,158,11,0.25);
+}
+
+/* ── Warm Glow Badge ───────────────────────────────────────── */
+.warm-glow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(175deg, #271804 0%, #160e02 100%);
+  border: 1px solid rgba(245,158,11,0.35);
+  border-bottom: 1px solid rgba(0,0,0,0.4);
+  padding: 2px 7px;
+  border-radius: 10px;
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 700;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    0 0 8px rgba(245,158,11,0.25),
+    0 1px 3px rgba(0,0,0,0.4);
+}
+
+.glow-dot-warm {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 6px var(--amber);
+  animation: pulseWarm 2s infinite;
+  flex-shrink: 0;
+}
+
+/* ── Modal ─────────────────────────────────────────────────── */
+.skeuo-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3,6,11,0.88);
+  backdrop-filter: blur(14px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.18s ease-out;
+}
+
+.skeuo-modal-container {
+  background: linear-gradient(175deg, #131c2c 0%, #09101a 100%);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-top: 1px solid rgba(255,255,255,0.28);
+  border-radius: 14px;
+  width: 680px;
+  max-width: 95vw;
+  max-height: 88vh;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    0 30px 70px rgba(0,0,0,0.9),
+    0 0 24px rgba(0,229,255,0.12);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalSlideUp 0.25s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* ── Keyframes ─────────────────────────────────────────────── */
+@keyframes pulseWarm {
+  0%   { box-shadow: 0 0 0 0   rgba(245,158,11,0.7); }
+  70%  { box-shadow: 0 0 0 5px rgba(245,158,11,0); }
+  100% { box-shadow: 0 0 0 0   rgba(245,158,11,0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes modalSlideUp {
+  from { transform: translateY(16px) scale(0.97); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── r3f-webgpu-perf Custom Styles (Skeuomorphism Convex) ──── */
+.perf-panel {
+  position: absolute !important;
+  top: 14px !important;
+  right: 14px !important;
+  font-family: var(--font-ui) !important;
+  font-size: 11px !important;
+  background: linear-gradient(175deg, #131c2c 0%, #09101b 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.6) !important;
+  border-radius: 9px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 4px 14px rgba(0, 0, 0, 0.6),
+    0 0 16px rgba(0, 229, 255, 0.15) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  max-width: 250px !important;
+  z-index: 15 !important;
+}
+
+.perf-panel:before {
+  background: linear-gradient(90deg, #00e5ff 0%, #3b82f6 100%) !important;
+  height: 2px !important;
+  opacity: 0.8 !important;
+}
+
+.perf-header {
+  gap: 10px !important;
+  padding: 8px 10px 4px !important;
+}
+
+.perf-metric {
+  min-width: 44px !important;
+}
+
+.perf-metric-value {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+
+.perf-metric-value.fps {
+  color: var(--cyan) !important;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+}
+
+.perf-metric-value.gpu {
+  color: var(--amber) !important;
+}
+
+.perf-metric-value.cpu {
+  color: #a78bfa !important;
+}
+
+.perf-metric-label {
+  font-size: 8px !important;
+  letter-spacing: 0.08em !important;
+  color: var(--muted) !important;
+}
+
+.perf-graph-container {
+  height: 38px !important;
+  margin: 0 10px !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 5px !important;
+}
+
+.perf-graph-legend {
+  padding: 3px 10px 4px !important;
+  gap: 8px !important;
+}
+
+.perf-legend-item {
+  font-size: 8px !important;
+}
+
+.perf-stats {
+  padding: 4px 10px 6px !important;
+  gap: 2px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+.perf-stat {
+  padding: 3px 4px !important;
+}
+
+.perf-stat-value {
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+}
+
+.perf-stat-label {
+  font-size: 7.5px !important;
+}
+
+.perf-vram {
+  padding: 4px 10px 6px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+.perf-toolbar {
+  padding: 4px 8px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+.perf-icon-btn, .perf-theme-btn {
+  width: 20px !important;
+  height: 18px !important;
+  border-radius: 5px !important;
+  background: linear-gradient(175deg, #1e2d42 0%, #111a28 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15) !important;
+}
