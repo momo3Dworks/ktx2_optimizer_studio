@@ -74,6 +74,14 @@ export interface CompressionMetrics {
   compressedVertices: number;
   originalTexturesSizeBytes: number;
   compressedTexturesSizeBytes: number;
+  originalGpuVramBytes: number;
+  compressedGpuVramBytes: number;
+  originalTextureVramBytes: number;
+  compressedTextureVramBytes: number;
+  originalGeometryVramBytes: number;
+  compressedGeometryVramBytes: number;
+  originalDrawCalls: number;
+  compressedDrawCalls: number;
   processingTimeMs: number;
 }
 

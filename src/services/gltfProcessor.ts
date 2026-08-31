@@ -265,14 +265,28 @@ export async function processGLB(
   const doc = await io.readBinary(new Uint8Array(buffer));
   const root = doc.getRoot();
 
-  // Count original vertices
+  // Calculate Original Geometry VRAM & Draw Calls
   let originalVertices = 0;
-  root.listMeshes().forEach((m) => {
-    m.listPrimitives().forEach((p) => {
-      const pos = p.getAttribute('POSITION');
-      if (pos) originalVertices += pos.getCount();
+  let originalDrawCalls = 0;
+  root.listScenes().forEach((scene) => {
+    scene.traverse((node) => {
+      const mesh = node.getMesh();
+      if (mesh) {
+        mesh.listPrimitives().forEach((p) => {
+          originalDrawCalls++;
+          const pos = p.getAttribute('POSITION');
+          if (pos) originalVertices += pos.getCount();
+        });
+      }
     });
   });
+
+  // Calculate Original Texture VRAM (RGBA8 decompressed in GPU memory + mipmaps)
+  let originalTextureVramBytes = 0;
+  const docTextures = root.listTextures();
+  let originalTexturesSizeBytes = 0;
+  let compressedTexturesSizeBytes = 0;
+  let compressedTextureVramBytes = 0;
 
   // 1. Tag Protected Nodes
   root.listNodes().forEach((node) => {
@@ -283,10 +297,6 @@ export async function processGLB(
   });
 
   // 2. Texture Processing & Resizing (Crushes texture size to target resolution/format)
-  const docTextures = root.listTextures();
-  let originalTexturesSizeBytes = 0;
-  let compressedTexturesSizeBytes = 0;
-
   for (let i = 0; i < docTextures.length; i++) {
     const docTex = docTextures[i];
     const imgBytes = docTex.getImage();
@@ -294,6 +304,11 @@ export async function processGLB(
 
     const originalSize = imgBytes.byteLength;
     originalTexturesSizeBytes += originalSize;
+
+    // Original texture VRAM estimation
+    const origW = texturesToCompress[i]?.width || 1024;
+    const origH = texturesToCompress[i]?.height || 1024;
+    originalTextureVramBytes += Math.round(origW * origH * 4 * 1.3333);
 
     // Match accurately by index or ID
     const matchingItem = texturesToCompress[i] || texturesToCompress.find(
@@ -308,7 +323,7 @@ export async function processGLB(
       const effectiveQuality = textureSettings.quality;
 
       try {
-        const { data: resizedBytes, mimeType: outMime } = await compressImageCanvas(
+        const { data: resizedBytes, mimeType: outMime, width: newW, height: newH } = await compressImageCanvas(
           imgBytes,
           docTex.getMimeType() || 'image/png',
           effectiveRes,
@@ -318,12 +333,15 @@ export async function processGLB(
         docTex.setImage(resizedBytes);
         docTex.setMimeType(outMime);
         compressedTexturesSizeBytes += resizedBytes.byteLength;
+        compressedTextureVramBytes += Math.round(newW * newH * 4 * (textureSettings.mipmaps ? 1.3333 : 1.0));
       } catch (err) {
         console.warn(`Error compressing texture index ${i}:`, err);
         compressedTexturesSizeBytes += originalSize;
+        compressedTextureVramBytes += Math.round(origW * origH * 4 * 1.3333);
       }
     } else {
       compressedTexturesSizeBytes += originalSize;
+      compressedTextureVramBytes += Math.round(origW * origH * 4 * 1.3333);
     }
   }
 
@@ -394,14 +412,28 @@ export async function processGLB(
     compressedBytes.byteOffset + compressedBytes.byteLength
   );
 
-  // Calculate Compressed Vertex Count
+  // Calculate Compressed Vertex Count & Draw Calls
   let newVertexCount = 0;
-  doc.getRoot().listMeshes().forEach((m) => {
-    m.listPrimitives().forEach((p) => {
-      const pos = p.getAttribute('POSITION');
-      if (pos) newVertexCount += pos.getCount();
+  let compressedDrawCalls = 0;
+  doc.getRoot().listScenes().forEach((scene) => {
+    scene.traverse((node) => {
+      const mesh = node.getMesh();
+      if (mesh) {
+        mesh.listPrimitives().forEach((p) => {
+          compressedDrawCalls++;
+          const pos = p.getAttribute('POSITION');
+          if (pos) newVertexCount += pos.getCount();
+        });
+      }
     });
   });
+
+  // Calculate GPU Geometry VRAM
+  const originalGeometryVramBytes = Math.round(originalVertices * 44);
+  const compressedGeometryVramBytes = Math.round(newVertexCount * 18);
+
+  const originalGpuVramBytes = originalTextureVramBytes + originalGeometryVramBytes;
+  const compressedGpuVramBytes = compressedTextureVramBytes + compressedGeometryVramBytes;
 
   const processingTimeMs = Math.round(performance.now() - startTime);
 
@@ -410,10 +442,18 @@ export async function processGLB(
     metrics: {
       originalSizeBytes: buffer.byteLength,
       compressedSizeBytes: compressedBuffer.byteLength,
-      originalVertices: originalVertices,
+      originalVertices,
       compressedVertices: newVertexCount,
       originalTexturesSizeBytes,
       compressedTexturesSizeBytes,
+      originalGpuVramBytes,
+      compressedGpuVramBytes,
+      originalTextureVramBytes,
+      compressedTextureVramBytes,
+      originalGeometryVramBytes,
+      compressedGeometryVramBytes,
+      originalDrawCalls,
+      compressedDrawCalls,
       processingTimeMs
     }
   };
@@ -426,7 +466,7 @@ async function compressImageCanvas(
   targetRes: number,
   targetFormat: string,
   quality: number
-): Promise<{ data: Uint8Array; mimeType: string }> {
+): Promise<{ data: Uint8Array; mimeType: string; width: number; height: number }> {
   return new Promise((resolve) => {
     const blob = new Blob([new Uint8Array(bytes)], { type: mimeType });
     const url = URL.createObjectURL(blob);
@@ -459,7 +499,7 @@ async function compressImageCanvas(
       const ctx = canvas.getContext('2d', { alpha: true });
 
       if (!ctx) {
-        resolve({ data: bytes, mimeType });
+        resolve({ data: bytes, mimeType, width: origW, height: origH });
         return;
       }
 
@@ -487,10 +527,12 @@ async function compressImageCanvas(
             const arrBuffer = await resBlob.arrayBuffer();
             resolve({
               data: new Uint8Array(arrBuffer),
-              mimeType: resBlob.type || outMime
+              mimeType: resBlob.type || outMime,
+              width: canvas.width,
+              height: canvas.height
             });
           } else {
-            resolve({ data: bytes, mimeType });
+            resolve({ data: bytes, mimeType, width: canvas.width, height: canvas.height });
           }
         },
         outMime,
@@ -500,7 +542,7 @@ async function compressImageCanvas(
 
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      resolve({ data: bytes, mimeType });
+      resolve({ data: bytes, mimeType, width: targetRes, height: targetRes });
     };
 
     img.src = url;

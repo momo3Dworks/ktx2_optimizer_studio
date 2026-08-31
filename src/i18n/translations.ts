@@ -124,6 +124,18 @@ export const translations = {
     closeReport: 'Cerrar Reporte',
     exportCompressedGlb: 'Exportar GLB Comprimido',
 
+    // GPU & VRAM Impact
+    gpuUsageTitle: 'Uso de Memoria GPU (VRAM)',
+    gpuUsageSubtitle: 'Huella de memoria en la tarjeta gráfica antes y después de la descompresión WebGL',
+    originalVram: 'VRAM Original',
+    compressedVram: 'VRAM Optimizada',
+    vramSaved: 'VRAM Liberada',
+    textureVram: 'VRAM Texturas (RGBA8):',
+    geometryVram: 'VRAM Geometría (Buffers):',
+    drawCalls: 'Draw Calls Estimados:',
+    gpuBandwidth: 'Transferencia PCIe / Ancho de Banda',
+    gpuBandwidthDesc: 'Reducción drástica en consumo de bus de video y decodificación de texturas en GPU.',
+
     // Viewport 3D
     vpOriginal: '📷 Modelo Original',
     vpCompressed: '⚡ Modelo Comprimido (Draco + KTX2)',
@@ -283,9 +295,21 @@ export const translations = {
     maxResMipmaps: 'Max Res & Mipmaps:',
     processingTime: 'Processing time:',
     fileLabel: 'File:',
-    openSplitView: 'Open in Comparative Split View',
+    openSplitView: 'Open in Split View',
     closeReport: 'Close Report',
     exportCompressedGlb: 'Export Compressed GLB',
+
+    // GPU & VRAM Impact
+    gpuUsageTitle: 'GPU Memory Usage (VRAM)',
+    gpuUsageSubtitle: 'Graphics card memory footprint before and after WebGL decompression',
+    originalVram: 'Original VRAM',
+    compressedVram: 'Optimized VRAM',
+    vramSaved: 'VRAM Freed',
+    textureVram: 'Texture VRAM (RGBA8):',
+    geometryVram: 'Geometry VRAM (Buffers):',
+    drawCalls: 'Estimated Draw Calls:',
+    gpuBandwidth: 'PCIe Transfer / Bandwidth',
+    gpuBandwidthDesc: 'Drastic reduction in GPU memory bus transfer and texture decompression workload.',
 
     // Viewport 3D
     vpOriginal: '📷 Original Model',

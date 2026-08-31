@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import {
   Upload, Box, Zap, Download, Eye, Layers, Sparkles,
-  RefreshCw, FileCheck, BarChart3, Globe, Triangle, Cpu, Image as ImageIcon
+  RefreshCw, FileCheck, BarChart3, Globe
 } from 'lucide-react';
 import { ViewMode, CompressionMetrics, ModelFileStats } from '../types/gltf';
 import { Language, translations } from '../i18n/translations';
@@ -46,57 +46,132 @@ export const Header: React.FC<HeaderProps> = ({
 
   const isDefaultModel = fileName === DEFAULT_FILE_NAME;
 
-  /* ── Inline filename+stats chip ── */
+  /* ── Unified Filename + Live Status / Comparison Chip ── */
   const FileChip = () => {
     if (!fileName) return null;
+
     return (
       <div
+        className="skeuo-card"
+        onClick={metrics ? onOpenReportModal : undefined}
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '5px',
-          background: 'var(--bg-dark)',
-          padding: '2px 8px 2px 6px',
-          borderRadius: '6px',
-          border: '1px solid rgba(255,255,255,0.07)',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 1px 3px rgba(0,0,0,0.4)',
-          maxWidth: isMobile ? '120px' : '260px',
-          flexShrink: 0
+          gap: '6px',
+          background: metrics
+            ? 'linear-gradient(165deg, rgba(20, 35, 55, 0.95), rgba(10, 18, 30, 0.95))'
+            : 'var(--bg-dark)',
+          padding: '3px 9px 3px 7px',
+          borderRadius: '7px',
+          border: metrics
+            ? '1px solid rgba(0, 229, 255, 0.4)'
+            : '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: metrics
+            ? '0 0 10px rgba(0, 229, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 2px 5px rgba(0,0,0,0.5)'
+            : 'inset 0 1px 0 rgba(255,255,255,0.06), 0 1px 3px rgba(0,0,0,0.4)',
+          cursor: metrics ? 'pointer' : 'default',
+          flexShrink: 0,
+          transition: 'all 0.18s ease'
         }}
+        title={
+          metrics
+            ? (lang === 'es' ? '¡Archivo comprimido! Clic para abrir el reporte completo' : 'Compressed! Click to open full report')
+            : (fileStats
+                ? `${fileStats.sizeBytes.toLocaleString()} bytes · ${fileStats.vertexCount.toLocaleString()} ${t.statusVertices} · ${fileStats.faceCount.toLocaleString()} ${t.statusTriangles} · ${fileStats.textureCount} ${t.statusTextures}`
+                : fileName)
+        }
       >
-        {/* filename */}
+        {/* File icon / Metric icon */}
+        {metrics ? (
+          <FileCheck size={13} color="var(--cyan)" style={{ flexShrink: 0 }} />
+        ) : (
+          <Box size={12} color="var(--cyan)" style={{ flexShrink: 0 }} />
+        )}
+
+        {/* Filename */}
         <span
           style={{
-            fontSize: '10px', color: 'var(--muted)',
-            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            maxWidth: isMobile ? '80px' : '130px',
+            fontSize: '10.5px',
+            fontWeight: metrics ? 700 : 500,
+            color: metrics ? '#e2e8f0' : 'var(--muted)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            maxWidth: isMobile ? '85px' : '125px',
           }}
-          title={fileName}
         >
           {fileName}
         </span>
 
-        {/* Inline file stats — shown when parsed and not yet compressed */}
-        {!metrics && fileStats && !isMobile && (
+        {/* ── 1. PRE-COMPRESSION STATS (Next to filename) ── */}
+        {!metrics && fileStats && (
           <>
             <span style={{ width: '1px', height: '11px', background: 'rgba(255,255,255,0.12)', flexShrink: 0 }} />
             <span
-              style={{ fontSize: '9.5px', fontWeight: 700, color: 'var(--cyan)', whiteSpace: 'nowrap' }}
-              title={t.statusVertices}
+              style={{ fontSize: '10px', fontWeight: 800, color: 'var(--cyan)', whiteSpace: 'nowrap' }}
             >
               {formatMB(fileStats.sizeBytes)}
             </span>
-            <span style={{ width: '1px', height: '11px', background: 'rgba(255,255,255,0.10)', flexShrink: 0 }} />
-            <span style={{ fontSize: '9px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>
-              {(fileStats.vertexCount / 1000).toFixed(1)}k <strong style={{ color: '#e2e8f0' }}>V</strong>
+            {!isMobile && (
+              <>
+                <span style={{ width: '1px', height: '11px', background: 'rgba(255,255,255,0.10)', flexShrink: 0 }} />
+                <span style={{ fontSize: '9.5px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+                  {(fileStats.vertexCount / 1000).toFixed(1)}k <strong style={{ color: '#e2e8f0' }}>V</strong>
+                </span>
+                <span style={{ fontSize: '9.5px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+                  {(fileStats.faceCount / 1000).toFixed(1)}k <strong style={{ color: 'var(--gold)' }}>T</strong>
+                </span>
+                {fileStats.textureCount > 0 && (
+                  <span style={{ fontSize: '9.5px', color: 'var(--amber)', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                    {fileStats.textureCount} tex
+                  </span>
+                )}
+              </>
+            )}
+          </>
+        )}
+
+        {/* ── 2. POST-COMPRESSION RESULTS COMPARISON (Next to filename) ── */}
+        {metrics && (
+          <>
+            <span style={{ width: '1px', height: '12px', background: 'rgba(0,229,255,0.3)', flexShrink: 0 }} />
+
+            {!isMobile && (
+              <>
+                <span style={{ fontSize: '10px', color: 'var(--muted)', textDecoration: 'line-through' }}>
+                  {formatMB(metrics.originalSizeBytes)}
+                </span>
+                <span style={{ fontSize: '9px', color: 'var(--cyan)' }}>➔</span>
+              </>
+            )}
+
+            <span style={{ fontSize: '10.5px', fontWeight: 800, color: 'var(--gold)', whiteSpace: 'nowrap' }}>
+              {formatMB(metrics.compressedSizeBytes)}
             </span>
-            <span style={{ fontSize: '9px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>
-              {(fileStats.faceCount / 1000).toFixed(1)}k <strong style={{ color: 'var(--gold)' }}>T</strong>
+
+            <span
+              style={{
+                fontSize: '9.5px',
+                fontWeight: 800,
+                color: '#4ade80',
+                background: 'rgba(74,222,128,0.15)',
+                padding: '1px 5px',
+                borderRadius: '4px',
+                border: '1px solid rgba(74,222,128,0.35)',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              -{pct}%
             </span>
-            {fileStats.textureCount > 0 && (
-              <span style={{ fontSize: '9px', color: 'var(--amber)', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                {fileStats.textureCount} tex
-              </span>
+
+            {!isMobile && (
+              <>
+                <span style={{ width: '1px', height: '11px', background: 'rgba(255,255,255,0.10)', flexShrink: 0 }} />
+                <span style={{ fontSize: '9.5px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+                  {(metrics.compressedVertices / 1000).toFixed(1)}k <strong style={{ color: '#e2e8f0' }}>V</strong>
+                </span>
+                <BarChart3 size={11} color="var(--cyan)" style={{ marginLeft: '1px' }} />
+              </>
             )}
           </>
         )}
@@ -114,7 +189,7 @@ export const Header: React.FC<HeaderProps> = ({
               alignItems: 'center',
               color: 'rgba(148, 163, 184, 0.5)',
               textDecoration: 'none',
-              fontSize: '9px',
+              fontSize: '9.5px',
               marginLeft: '2px',
               flexShrink: 0,
               transition: 'color 0.15s'
@@ -144,7 +219,7 @@ export const Header: React.FC<HeaderProps> = ({
         flexShrink: 0
       }}
     >
-      {/* ── Left: Brand + file actions ── */}
+      {/* ── Left: Brand + File actions + Unified Filename & Results Chip ── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, overflow: 'hidden' }}>
         {/* Logo */}
         <div
@@ -197,7 +272,7 @@ export const Header: React.FC<HeaderProps> = ({
           </>
         )}
 
-        {/* ── Filename chip with inline stats — always visible ── */}
+        {/* ── Filename + Live Status & Results Comparison Chip ── */}
         <FileChip />
       </div>
 
@@ -228,7 +303,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       )}
 
-      {/* ── Right: lang + comparative metrics + actions ── */}
+      {/* ── Right: lang + actions ── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
         {/* Language toggle */}
         <button
@@ -239,44 +314,6 @@ export const Header: React.FC<HeaderProps> = ({
           <Globe size={12} color="var(--cyan)" />
           {lang === 'es' ? 'ES' : 'EN'}
         </button>
-
-        {/* ── Compression result pill (replaces the file chip stats) ── */}
-        {metrics && (
-          <div
-            onClick={onOpenReportModal}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '5px',
-              background: 'var(--bg-card)',
-              padding: '3px 8px', borderRadius: '7px',
-              border: '1px solid rgba(245,158,11,0.3)',
-              boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.12), 0 0 8px rgba(245,158,11,0.2), 0 2px 5px rgba(0,0,0,0.4)',
-              cursor: 'pointer'
-            }}
-            title={lang === 'es' ? 'Clic para ver reporte detallado' : 'Click to view detailed report'}
-          >
-            <FileCheck size={12} color="var(--amber)" />
-            {!isMobile && (
-              <>
-                <span style={{ fontSize: '10.5px', color: 'var(--muted)' }}>{formatMB(metrics.originalSizeBytes)}</span>
-                <span style={{ fontSize: '9px', color: 'var(--amber)' }}>➔</span>
-              </>
-            )}
-            <span style={{ fontSize: '10.5px', fontWeight: 800, color: 'var(--gold)' }}>
-              {formatMB(metrics.compressedSizeBytes)}
-            </span>
-            <span
-              style={{
-                fontSize: '9.5px', fontWeight: 800, color: '#4ade80',
-                background: 'rgba(74,222,128,0.1)', padding: '1px 4px',
-                borderRadius: '4px', border: '1px solid rgba(74,222,128,0.25)'
-              }}
-            >
-              -{pct}%
-            </span>
-            <BarChart3 size={11} color="var(--cyan)" />
-          </div>
-        )}
 
         {/* Desktop: Compress + Download */}
         {!isMobile && (
