@@ -146,6 +146,14 @@ export const translations = {
     themeLabel: 'Tema UI',
     highContrastShadows: 'Sombras Alto Contraste',
 
+    // Mobile Portrait Navigation
+    mobileOptions: 'Opciones',
+    mobileHierarchy: 'Jerarquía',
+    mobileCompress: 'Comprimir',
+    mobileView: 'Vista',
+    mobileMenu: 'Acciones',
+    closeDrawer: 'Cerrar',
+
     // Footer
     footerVersion: 'v1.0.0',
     footerAuthor: 'by Yeberson Orta',
@@ -295,6 +303,14 @@ export const translations = {
     themeNeumorphism: 'Neumorph',
     themeLabel: 'UI Theme',
     highContrastShadows: 'High Contrast Shadows',
+
+    // Mobile Portrait Navigation
+    mobileOptions: 'Options',
+    mobileHierarchy: 'Hierarchy',
+    mobileCompress: 'Compress',
+    mobileView: 'View',
+    mobileMenu: 'Actions',
+    closeDrawer: 'Close',
 
     // Footer
     footerVersion: 'v1.0.0',

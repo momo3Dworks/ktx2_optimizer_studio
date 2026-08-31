@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   FolderTree, Search, ShieldCheck, ShieldAlert,
-  Camera, Sun, Box, CircleDot, Route, Layers, Square
+  Camera, Sun, Box, CircleDot, Route, Layers, Square, X
 } from 'lucide-react';
 import { SceneNodeInfo } from '../types/gltf';
 import { Language, translations } from '../i18n/translations';
@@ -13,11 +13,12 @@ interface RightPanelProps {
   toggleNodeProtection: (nodeName: string) => void;
   selectedNodeName: string | null;
   setSelectedNodeName: (name: string | null) => void;
+  onCloseMobile?: () => void;
 }
 
 export const RightPanel: React.FC<RightPanelProps> = ({
   lang, nodes, protectedNodeIds, toggleNodeProtection,
-  selectedNodeName, setSelectedNodeName
+  selectedNodeName, setSelectedNodeName, onCloseMobile
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const t = translations[lang];
@@ -126,7 +127,8 @@ export const RightPanel: React.FC<RightPanelProps> = ({
     <aside
       className="skeuo-panel"
       style={{
-        width: '272px', height: 'calc(100vh - 46px)',
+        width: onCloseMobile ? '100%' : '272px',
+        height: onCloseMobile ? '100%' : 'calc(100vh - 46px)',
         display: 'flex', flexDirection: 'column',
         zIndex: 20, flexShrink: 0
       }}
@@ -145,9 +147,21 @@ export const RightPanel: React.FC<RightPanelProps> = ({
             {t.hierarchyTitle}
           </span>
         </div>
-        <span className="warm-glow-badge">
-          {protectedNodeIds.size} {t.protectedCount}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span className="warm-glow-badge">
+            {protectedNodeIds.size} {t.protectedCount}
+          </span>
+          {onCloseMobile && (
+            <button
+              className="btn-convex-secondary"
+              onClick={onCloseMobile}
+              style={{ padding: '2px 8px', gap: '4px' }}
+            >
+              <X size={13} color="var(--amber)" />
+              <span style={{ fontSize: '10px', fontWeight: 700 }}>{t.closeDrawer}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Search + quick actions */}

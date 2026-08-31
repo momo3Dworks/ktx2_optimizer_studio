@@ -4,6 +4,8 @@ import { LeftPanel } from './components/LeftPanel';
 import { RightPanel } from './components/RightPanel';
 import { Viewport3D } from './components/Viewport3D';
 import { CompressionModal } from './components/CompressionModal';
+import { MobileDock } from './components/MobileDock';
+import { MobileActionsModal } from './components/MobileActionsModal';
 import { generateSampleGLB } from './services/sampleModelGenerator';
 import { parseGLBStructure, processGLB } from './services/gltfProcessor';
 import { Language } from './i18n/translations';
@@ -50,6 +52,21 @@ export const App: React.FC = () => {
     if (paletteId) html.classList.add(`palette-${paletteId}`);
     if (highContrastShadows) html.classList.add('high-contrast-shadows');
   }, [theme, paletteId, highContrastShadows]);
+
+  // Mobile Responsive & Drawer State
+  const [isMobile, setIsMobile] = useState<boolean>(typeof window !== 'undefined' ? window.innerWidth < 860 : false);
+  const [mobileDrawer, setMobileDrawer] = useState<'none' | 'left' | 'right'>('none');
+  const [isMobileActionsOpen, setIsMobileActionsOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 860;
+      setIsMobile(mobile);
+      if (!mobile) setMobileDrawer('none');
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // GLB Model State
   const [originalBuffer, setOriginalBuffer] = useState<ArrayBuffer | null>(null);
@@ -227,35 +244,41 @@ export const App: React.FC = () => {
         onCompress={handleCompress}
         onDownload={handleDownload}
         onOpenReportModal={() => setIsReportModalOpen(true)}
+        isMobile={isMobile}
+        onOpenMobileActions={() => setIsMobileActionsOpen(true)}
       />
 
       <div style={{ flex: 1, display: 'flex', position: 'relative', overflow: 'hidden' }}>
-        <LeftPanel
-          lang={lang}
-          theme={theme}
-          setTheme={handleThemeChange}
-          paletteId={paletteId}
-          setPaletteId={setPaletteId}
-          highContrastShadows={highContrastShadows}
-          setHighContrastShadows={setHighContrastShadows}
-          meshOpts={meshOpts}
-          setMeshOpts={setMeshOpts}
-          vertexQuantization={vertexQuantization}
-          setVertexQuantization={setVertexQuantization}
-          vertexCompression={vertexCompression}
-          setVertexCompression={setVertexCompression}
-          textures={textures}
-          setTextures={setTextures}
-          textureSettings={textureSettings}
-          setTextureSettings={setTextureSettings}
-          onHoverTextureObjects={(objectNames) => setHighlightedObjectNames(objectNames)}
-          onCompress={handleCompress}
-          onFileUpload={handleFileUpload}
-          isProcessing={isProcessing}
-          hasBuffer={!!originalBuffer}
-          fileName={fileName}
-        />
+        {/* Desktop LeftPanel */}
+        {!isMobile && (
+          <LeftPanel
+            lang={lang}
+            theme={theme}
+            setTheme={handleThemeChange}
+            paletteId={paletteId}
+            setPaletteId={setPaletteId}
+            highContrastShadows={highContrastShadows}
+            setHighContrastShadows={setHighContrastShadows}
+            meshOpts={meshOpts}
+            setMeshOpts={setMeshOpts}
+            vertexQuantization={vertexQuantization}
+            setVertexQuantization={setVertexQuantization}
+            vertexCompression={vertexCompression}
+            setVertexCompression={setVertexCompression}
+            textures={textures}
+            setTextures={setTextures}
+            textureSettings={textureSettings}
+            setTextureSettings={setTextureSettings}
+            onHoverTextureObjects={(objectNames) => setHighlightedObjectNames(objectNames)}
+            onCompress={handleCompress}
+            onFileUpload={handleFileUpload}
+            isProcessing={isProcessing}
+            hasBuffer={!!originalBuffer}
+            fileName={fileName}
+          />
+        )}
 
+        {/* 3D Viewport (Full width on mobile) */}
         <Viewport3D
           lang={lang}
           originalBuffer={originalBuffer}
@@ -265,15 +288,150 @@ export const App: React.FC = () => {
           highlightedObjectNames={highlightedObjectNames}
         />
 
-        <RightPanel
-          lang={lang}
-          nodes={nodes}
-          protectedNodeIds={protectedNodeIds}
-          toggleNodeProtection={toggleNodeProtection}
-          selectedNodeName={selectedNodeName}
-          setSelectedNodeName={setSelectedNodeName}
-        />
+        {/* Desktop RightPanel */}
+        {!isMobile && (
+          <RightPanel
+            lang={lang}
+            nodes={nodes}
+            protectedNodeIds={protectedNodeIds}
+            toggleNodeProtection={toggleNodeProtection}
+            selectedNodeName={selectedNodeName}
+            setSelectedNodeName={setSelectedNodeName}
+          />
+        )}
+
+        {/* ── MOBILE SLIDE-OVER DRAWERS ── */}
+        {isMobile && mobileDrawer === 'left' && (
+          <div
+            className="skeuo-modal-overlay"
+            onClick={() => setMobileDrawer('none')}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 50,
+              background: 'rgba(3, 6, 11, 0.75)',
+              backdropFilter: 'blur(8px)',
+              display: 'flex',
+              justifyContent: 'flex-start',
+              padding: 0
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: 'min(92vw, 360px)',
+                height: '100%',
+                background: 'var(--bg-panel)',
+                boxShadow: '10px 0 35px rgba(0,0,0,0.9)',
+                animation: 'fadeSlideIn 0.2s cubic-bezier(0.16,1,0.3,1)'
+              }}
+            >
+              <LeftPanel
+                lang={lang}
+                theme={theme}
+                setTheme={handleThemeChange}
+                paletteId={paletteId}
+                setPaletteId={setPaletteId}
+                highContrastShadows={highContrastShadows}
+                setHighContrastShadows={setHighContrastShadows}
+                meshOpts={meshOpts}
+                setMeshOpts={setMeshOpts}
+                vertexQuantization={vertexQuantization}
+                setVertexQuantization={setVertexQuantization}
+                vertexCompression={vertexCompression}
+                setVertexCompression={setVertexCompression}
+                textures={textures}
+                setTextures={setTextures}
+                textureSettings={textureSettings}
+                setTextureSettings={setTextureSettings}
+                onHoverTextureObjects={(objectNames) => setHighlightedObjectNames(objectNames)}
+                onCompress={() => {
+                  handleCompress();
+                  setMobileDrawer('none');
+                }}
+                onFileUpload={(file) => {
+                  handleFileUpload(file);
+                  setMobileDrawer('none');
+                }}
+                isProcessing={isProcessing}
+                hasBuffer={!!originalBuffer}
+                fileName={fileName}
+                onCloseMobile={() => setMobileDrawer('none')}
+              />
+            </div>
+          </div>
+        )}
+
+        {isMobile && mobileDrawer === 'right' && (
+          <div
+            className="skeuo-modal-overlay"
+            onClick={() => setMobileDrawer('none')}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 50,
+              background: 'rgba(3, 6, 11, 0.75)',
+              backdropFilter: 'blur(8px)',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              padding: 0
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: 'min(92vw, 340px)',
+                height: '100%',
+                background: 'var(--bg-panel)',
+                boxShadow: '-10px 0 35px rgba(0,0,0,0.9)',
+                animation: 'fadeSlideIn 0.2s cubic-bezier(0.16,1,0.3,1)'
+              }}
+            >
+              <RightPanel
+                lang={lang}
+                nodes={nodes}
+                protectedNodeIds={protectedNodeIds}
+                toggleNodeProtection={toggleNodeProtection}
+                selectedNodeName={selectedNodeName}
+                setSelectedNodeName={setSelectedNodeName}
+                onCloseMobile={() => setMobileDrawer('none')}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ── MOBILE FLOATING DOCK ── */}
+        {isMobile && (
+          <MobileDock
+            lang={lang}
+            activeDrawer={mobileDrawer}
+            setActiveDrawer={setMobileDrawer}
+            protectedCount={protectedNodeIds.size}
+            onCompress={handleCompress}
+            isProcessing={isProcessing}
+            hasBuffer={!!originalBuffer}
+            hasCompressed={!!compressedBuffer}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            onOpenActions={() => setIsMobileActionsOpen(true)}
+          />
+        )}
       </div>
+
+      {/* Mobile Quick Actions Modal Sheet */}
+      <MobileActionsModal
+        lang={lang}
+        setLang={setLang}
+        isOpen={isMobileActionsOpen}
+        onClose={() => setIsMobileActionsOpen(false)}
+        fileName={fileName}
+        metrics={metrics}
+        hasCompressed={!!compressedBuffer}
+        onFileUpload={handleFileUpload}
+        onLoadSample={loadSampleModel}
+        onDownload={handleDownload}
+        onOpenReportModal={() => setIsReportModalOpen(true)}
+      />
 
       {/* Compression Detail Report Modal */}
       <CompressionModal

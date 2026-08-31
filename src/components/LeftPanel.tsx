@@ -37,6 +37,7 @@ interface LeftPanelProps {
   isProcessing?: boolean;
   hasBuffer?: boolean;
   fileName?: string;
+  onCloseMobile?: () => void;
 }
 
 export const LeftPanel: React.FC<LeftPanelProps> = ({
@@ -44,7 +45,7 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
   meshOpts, setMeshOpts, vertexQuantization, setVertexQuantization,
   vertexCompression, setVertexCompression, textures, setTextures,
   textureSettings, setTextureSettings, onHoverTextureObjects, onCompress, onFileUpload,
-  isProcessing = false, hasBuffer = false, fileName
+  isProcessing = false, hasBuffer = false, fileName, onCloseMobile
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -119,8 +120,8 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
     <aside
       className="skeuo-panel"
       style={{
-        width: isExpanded ? '440px' : '272px',
-        height: 'calc(100vh - 46px)',
+        width: onCloseMobile ? '100%' : isExpanded ? '440px' : '272px',
+        height: onCloseMobile ? '100%' : 'calc(100vh - 46px)',
         display: 'flex', flexDirection: 'column',
         transition: 'width 0.28s cubic-bezier(0.4,0,0.2,1)',
         zIndex: 20, flexShrink: 0
@@ -142,14 +143,28 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
             {t.compressionOptions}
           </span>
         </div>
-        <button
-          className="btn-convex-secondary"
-          onClick={() => setIsExpanded(!isExpanded)}
-          style={{ padding: '2px 6px' }}
-          title={isExpanded ? t.collapsePanel : t.expandPanel}
-        >
-          {isExpanded ? <Minimize2 size={11} /> : <Maximize2 size={11} />}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+          {!onCloseMobile && (
+            <button
+              className="btn-convex-secondary"
+              onClick={() => setIsExpanded(!isExpanded)}
+              style={{ padding: '2px 6px' }}
+              title={isExpanded ? t.collapsePanel : t.expandPanel}
+            >
+              {isExpanded ? <Minimize2 size={11} /> : <Maximize2 size={11} />}
+            </button>
+          )}
+          {onCloseMobile && (
+            <button
+              className="btn-convex-secondary"
+              onClick={onCloseMobile}
+              style={{ padding: '2px 8px', gap: '4px' }}
+            >
+              <X size={13} color="var(--amber)" />
+              <span style={{ fontSize: '10px', fontWeight: 700 }}>{t.closeDrawer}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main scrollable section */}

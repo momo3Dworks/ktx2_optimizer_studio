@@ -128,6 +128,7 @@ export const AnimationBar: React.FC<AnimationBarProps> = ({
 
   return (
     <div
+      className="animation-bar-container"
       style={{
         position: 'absolute',
         bottom: '20px',
@@ -135,7 +136,7 @@ export const AnimationBar: React.FC<AnimationBarProps> = ({
         transform: 'translateX(-50%)',
         zIndex: 30,
         width: 'min(720px, calc(100% - 80px))',
-        background: 'linear-gradient(180deg, #1a2035 0%, #0d1220 100%)',
+        background: 'var(--bg-panel)',
         backdropFilter: 'blur(16px)',
         border: '1px solid rgba(255,255,255,0.12)',
         borderTop: '1px solid rgba(255,255,255,0.2)',

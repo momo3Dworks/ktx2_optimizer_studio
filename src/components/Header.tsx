@@ -20,12 +20,14 @@ interface HeaderProps {
   onCompress: () => void;
   onDownload: () => void;
   onOpenReportModal: () => void;
+  isMobile?: boolean;
+  onOpenMobileActions?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   lang, setLang, fileName, isProcessing, viewMode, setViewMode,
   metrics, hasCompressed, onFileUpload, onLoadSample,
-  onCompress, onDownload, onOpenReportModal
+  onCompress, onDownload, onOpenReportModal, isMobile, onOpenMobileActions
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const t = translations[lang];
@@ -40,11 +42,11 @@ export const Header: React.FC<HeaderProps> = ({
       className="skeuo-panel"
       style={{
         height: '46px',
-        padding: '0 14px',
+        padding: '0 12px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: '10px',
+        gap: '8px',
         zIndex: 30,
         position: 'relative',
         flexShrink: 0
@@ -74,46 +76,49 @@ export const Header: React.FC<HeaderProps> = ({
               lineHeight: 1.1, whiteSpace: 'nowrap'
             }}
           >
-            KTX2 Optimizer Studio
+            {isMobile ? 'KTX2 Studio' : 'KTX2 Optimizer Studio'}
           </div>
-          <div style={{ fontSize: '9.5px', color: '#475569', lineHeight: 1, whiteSpace: 'nowrap' }}>
+          <div style={{ fontSize: '9px', color: 'var(--muted)', lineHeight: 1, whiteSpace: 'nowrap' }}>
             by Yeberson Orta
           </div>
         </div>
 
-        <div style={{ width: '1px', height: '20px', background: 'rgba(255,255,255,0.1)', flexShrink: 0 }} />
+        {/* Desktop-only file actions */}
+        {!isMobile && (
+          <>
+            <div style={{ width: '1px', height: '20px', background: 'rgba(255,255,255,0.1)', flexShrink: 0 }} />
+            <input
+              type="file" ref={fileInputRef}
+              onChange={e => e.target.files?.[0] && onFileUpload(e.target.files[0])}
+              accept=".glb,.gltf" style={{ display: 'none' }}
+            />
+            <button className="btn-convex-secondary" onClick={() => fileInputRef.current?.click()}>
+              <Upload size={12} /> {t.loadGlb}
+            </button>
+            <button className="btn-convex-secondary" onClick={onLoadSample}>
+              <Box size={12} color="var(--gold)" /> {t.sampleScene}
+            </button>
 
-        {/* File actions */}
-        <input
-          type="file" ref={fileInputRef}
-          onChange={e => e.target.files?.[0] && onFileUpload(e.target.files[0])}
-          accept=".glb,.gltf" style={{ display: 'none' }}
-        />
-        <button className="btn-convex-secondary" onClick={() => fileInputRef.current?.click()}>
-          <Upload size={12} /> {t.loadGlb}
-        </button>
-        <button className="btn-convex-secondary" onClick={onLoadSample}>
-          <Box size={12} color="var(--gold)" /> {t.sampleScene}
-        </button>
-
-        {fileName && (
-          <span
-            style={{
-              fontSize: '10.5px', color: '#475569',
-              background: 'linear-gradient(175deg,#111a26,#080e18)',
-              padding: '3px 8px', borderRadius: '5px',
-              border: '1px solid rgba(255,255,255,0.07)',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 1px 3px rgba(0,0,0,0.4)',
-              maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
-            }}
-          >
-            {fileName}
-          </span>
+            {fileName && (
+              <span
+                style={{
+                  fontSize: '10px', color: 'var(--muted)',
+                  background: 'var(--bg-dark)',
+                  padding: '3px 8px', borderRadius: '5px',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 1px 3px rgba(0,0,0,0.4)',
+                  maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+                }}
+              >
+                {fileName}
+              </span>
+            )}
+          </>
         )}
       </div>
 
-      {/* ── Centre: view-mode tabs (only when compressed) ── */}
-      {hasCompressed && (
+      {/* ── Centre: view-mode tabs (desktop only) ── */}
+      {!isMobile && hasCompressed && (
         <div className="tab-group-skeuo" style={{ width: '260px', flexShrink: 0 }}>
           <button
             className={`tab-btn-skeuo ${viewMode === 'original' ? 'active' : ''}`}
@@ -140,12 +145,12 @@ export const Header: React.FC<HeaderProps> = ({
       )}
 
       {/* ── Right: lang + metrics + actions ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '7px', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
         {/* Language */}
         <button
           className="btn-convex-secondary"
           onClick={() => setLang(lang === 'es' ? 'en' : 'es')}
-          style={{ padding: '3px 8px', gap: '4px', color: 'var(--gold)', fontWeight: 800, fontSize: '11px' }}
+          style={{ padding: '3px 8px', gap: '4px', color: 'var(--gold)', fontWeight: 800, fontSize: '10.5px' }}
         >
           <Globe size={12} color="var(--cyan)" />
           {lang === 'es' ? 'ES' : 'EN'}
@@ -156,47 +161,64 @@ export const Header: React.FC<HeaderProps> = ({
           <div
             onClick={onOpenReportModal}
             style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              background: 'linear-gradient(175deg,#18233a,#0d1524)',
-              padding: '3px 10px', borderRadius: '7px',
+              display: 'flex', alignItems: 'center', gap: '5px',
+              background: 'var(--bg-card)',
+              padding: '3px 8px', borderRadius: '7px',
               border: '1px solid rgba(245,158,11,0.3)',
-              borderBottom: '1px solid rgba(0,0,0,0.4)',
               boxShadow:
                 'inset 0 1px 0 rgba(255,255,255,0.12), 0 0 8px rgba(245,158,11,0.2), 0 2px 5px rgba(0,0,0,0.4)',
               cursor: 'pointer'
             }}
           >
-            <FileCheck size={13} color="var(--amber)" />
-            <span style={{ fontSize: '11px', color: '#94a3b8' }}>{formatMB(metrics.originalSizeBytes)}</span>
-            <span style={{ fontSize: '10px', color: 'var(--amber)' }}>➔</span>
-            <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--gold)' }}>
+            <FileCheck size={12} color="var(--amber)" />
+            {!isMobile && (
+              <>
+                <span style={{ fontSize: '10.5px', color: 'var(--muted)' }}>{formatMB(metrics.originalSizeBytes)}</span>
+                <span style={{ fontSize: '9px', color: 'var(--amber)' }}>➔</span>
+              </>
+            )}
+            <span style={{ fontSize: '10.5px', fontWeight: 800, color: 'var(--gold)' }}>
               {formatMB(metrics.compressedSizeBytes)}
             </span>
             <span
               style={{
-                fontSize: '10px', fontWeight: 800, color: '#4ade80',
-                background: 'rgba(74,222,128,0.1)', padding: '1px 5px',
+                fontSize: '9.5px', fontWeight: 800, color: '#4ade80',
+                background: 'rgba(74,222,128,0.1)', padding: '1px 4px',
                 borderRadius: '4px', border: '1px solid rgba(74,222,128,0.25)'
               }}
             >
               -{pct}%
             </span>
-            <BarChart3 size={12} color="var(--cyan)" />
+            <BarChart3 size={11} color="var(--cyan)" />
           </div>
         )}
 
-        {/* Process & Compress */}
-        <button className="btn-convex" onClick={onCompress} disabled={isProcessing}>
-          {isProcessing
-            ? <><RefreshCw size={13} style={{ animation: 'spin 1s linear infinite' }} /> {t.processing}</>
-            : <><Zap size={13} /> {t.processCompress}</>
-          }
-        </button>
+        {/* Desktop actions: Compress & Download */}
+        {!isMobile && (
+          <>
+            <button className="btn-convex" onClick={onCompress} disabled={isProcessing}>
+              {isProcessing
+                ? <><RefreshCw size={13} style={{ animation: 'spin 1s linear infinite' }} /> {t.processing}</>
+                : <><Zap size={13} /> {t.processCompress}</>
+              }
+            </button>
 
-        {/* Download */}
-        {hasCompressed && (
-          <button className="btn-convex-warm" onClick={onDownload}>
-            <Download size={12} /> {t.exportGlb}
+            {hasCompressed && (
+              <button className="btn-convex-warm" onClick={onDownload}>
+                <Download size={12} /> {t.exportGlb}
+              </button>
+            )}
+          </>
+        )}
+
+        {/* Mobile quick actions trigger */}
+        {isMobile && onOpenMobileActions && (
+          <button
+            className="btn-convex-secondary"
+            onClick={onOpenMobileActions}
+            style={{ padding: '3px 8px', color: 'var(--cyan)' }}
+          >
+            <Upload size={12} />
           </button>
         )}
       </div>
