@@ -9,6 +9,7 @@ import { Language, translations } from '../i18n/translations';
 import { AnimationDriver } from './AnimationDriver';
 import { AnimationBar } from './AnimationBar';
 import { Perf } from 'r3f-webgpu-perf';
+import { ExternalLink } from 'lucide-react';
 
 interface AnimationInfo {
   name: string;
@@ -32,6 +33,7 @@ interface Viewport3DProps {
   viewMode: ViewMode;
   selectedNodeName: string | null;
   highlightedObjectNames: string[];
+  fileName?: string;
 }
 
 /* ─────────────────────────────────────────────
@@ -133,6 +135,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
   viewMode,
   selectedNodeName,
   highlightedObjectNames,
+  fileName,
 }) => {
   const t = translations[lang];
 
@@ -243,7 +246,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
             >
               {t.viewOriginal}
             </div>
-            <Canvas camera={{ position: [3, 2, 4], fov: 50 }} shadows>
+            <Canvas camera={{ position: [3, 6, 8], fov: 50 }} shadows>
               <ambientLight intensity={0.7} />
               <directionalLight position={[5, 8, 5]} intensity={1.2} castShadow />
               <Environment preset="city" />
@@ -271,7 +274,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
             >
               {t.viewCompressed}
             </div>
-            <Canvas camera={{ position: [3, 2, 4], fov: 50 }} shadows>
+            <Canvas camera={{ position: [3, 6, 8], fov: 50 }} shadows>
               <ambientLight intensity={0.7} />
               <directionalLight position={[5, 8, 5]} intensity={1.2} castShadow />
               <Environment preset="city" />
@@ -303,7 +306,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
         </div>
       ) : (
         /* ── Single Viewport ── */
-        <Canvas camera={{ position: [3, 2, 4], fov: 50 }} shadows>
+        <Canvas camera={{ position: [3, 6, 8], fov: 50 }} shadows>
           <ambientLight intensity={0.7} />
           <directionalLight position={[5, 8, 5]} intensity={1.2} castShadow />
           <pointLight position={[-5, 5, -5]} intensity={0.5} />
@@ -336,6 +339,47 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
           <OrbitControls makeDefault enableDamping dampingFactor={0.05} />
           <Perf position="top-right" showGauge={true} minimal={true} />
         </Canvas>
+      )}
+
+      {/* ── Subtle Artist Credit Badge on Canvas ── */}
+      {fileName === 'wood_platform_diorama.glb' && (
+        <a
+          href="https://sketchfab.com/3d-models/wood-platform-diorama-7a76349928ca43ea9981de345f709ec3"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            position: 'absolute',
+            bottom: animations.length > 0 ? '78px' : '14px',
+            left: '14px',
+            zIndex: 25,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            padding: '3px 8px',
+            borderRadius: '6px',
+            background: 'rgba(8, 14, 24, 0.65)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
+            textDecoration: 'none',
+            color: 'var(--muted)',
+            fontSize: '9.5px',
+            fontWeight: 500,
+            transition: 'all 0.15s ease',
+            userSelect: 'none'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = 'var(--cyan)';
+            e.currentTarget.style.borderColor = 'rgba(0, 229, 255, 0.35)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = 'var(--muted)';
+            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+          }}
+        >
+          <ExternalLink size={10} color="var(--cyan)" />
+          <span>{t.artistCredit || 'Floating Lighthouse · Sketchfab'}</span>
+        </a>
       )}
 
       {/* ── Animation Bar (always rendered if buffer loaded) ── */}

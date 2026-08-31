@@ -9,7 +9,8 @@ import {
   weld,
   instance,
   quantize,
-  draco
+  draco,
+  prune
 } from '@gltf-transform/functions';
 import draco3d from 'draco3d';
 import {
@@ -75,6 +76,7 @@ export async function parseGLBStructure(buffer: ArrayBuffer): Promise<{
   textures: TextureItem[];
   vertexCount: number;
   faceCount: number;
+  meshCount: number;
 }> {
   const { encoder, decoder } = await getDracoModules();
   const io = new WebIO()
@@ -101,7 +103,7 @@ export async function parseGLBStructure(buffer: ArrayBuffer): Promise<{
       nodeName.includes('track') ||
       nodeName.includes('trajectory');
 
-// Helper to determine node type based on mesh presence and naming heuristics
+    // Helper to determine node type based on mesh presence and naming heuristics
     const detectNodeType = (hasMesh: boolean, isSplineByName: boolean, isLinePrimitive: boolean): SceneNodeInfo['type'] => {
       if (hasMesh) {
         return isSplineByName || isLinePrimitive ? 'spline' : 'mesh';
@@ -187,9 +189,12 @@ export async function parseGLBStructure(buffer: ArrayBuffer): Promise<{
       try {
         const img = new Image();
         img.src = dataUrl;
-        await new Promise((res) => (img.onload = res));
-        width = img.width || 512;
-        height = img.height || 512;
+        await new Promise((res) => {
+          img.onload = res;
+          img.onerror = res;
+        });
+        width = img.naturalWidth || img.width || 512;
+        height = img.naturalHeight || img.height || 512;
       } catch (e) {
         // Fallback
       }
@@ -217,7 +222,7 @@ export async function parseGLBStructure(buffer: ArrayBuffer): Promise<{
     });
 
     textureItems.push({
-      id: `tex_${i}_${name}`,
+      id: `tex_${i}`,
       name,
       width,
       height,
@@ -233,11 +238,12 @@ export async function parseGLBStructure(buffer: ArrayBuffer): Promise<{
     nodes: sceneNodes,
     textures: textureItems,
     vertexCount: totalVertices,
-    faceCount: Math.round(totalFaces)
+    faceCount: Math.round(totalFaces),
+    meshCount: root.listMeshes().length
   };
 }
 
-// Process and Compress GLB using gltf-transform
+// Process and Compress GLB using gltf-transform + Canvas WebP/Texture compression
 export async function processGLB(
   buffer: ArrayBuffer,
   protectedNodeIds: Set<string>,
@@ -259,7 +265,16 @@ export async function processGLB(
   const doc = await io.readBinary(new Uint8Array(buffer));
   const root = doc.getRoot();
 
-  // 1. Tag Protected Nodes (Meshes, Empties, Splines, Cameras, Lights marked by user)
+  // Count original vertices
+  let originalVertices = 0;
+  root.listMeshes().forEach((m) => {
+    m.listPrimitives().forEach((p) => {
+      const pos = p.getAttribute('POSITION');
+      if (pos) originalVertices += pos.getCount();
+    });
+  });
+
+  // 1. Tag Protected Nodes
   root.listNodes().forEach((node) => {
     const nodeName = node.getName();
     if (nodeName && protectedNodeIds.has(nodeName)) {
@@ -267,9 +282,54 @@ export async function processGLB(
     }
   });
 
+  // 2. Texture Processing & Resizing (Crushes texture size to target resolution/format)
+  const docTextures = root.listTextures();
+  let originalTexturesSizeBytes = 0;
+  let compressedTexturesSizeBytes = 0;
+
+  for (let i = 0; i < docTextures.length; i++) {
+    const docTex = docTextures[i];
+    const imgBytes = docTex.getImage();
+    if (!imgBytes) continue;
+
+    const originalSize = imgBytes.byteLength;
+    originalTexturesSizeBytes += originalSize;
+
+    // Match accurately by index or ID
+    const matchingItem = texturesToCompress[i] || texturesToCompress.find(
+      (t) => t.id === `tex_${i}` || (docTex.getName() && t.name === docTex.getName())
+    );
+
+    const isSelected = matchingItem ? matchingItem.selectedForCompression !== false : true;
+
+    if (isSelected) {
+      const effectiveRes = matchingItem?.customSettings?.resolution ?? textureSettings.resolution;
+      const effectiveFmt = matchingItem?.customSettings?.format ?? textureSettings.format;
+      const effectiveQuality = textureSettings.quality;
+
+      try {
+        const { data: resizedBytes, mimeType: outMime } = await compressImageCanvas(
+          imgBytes,
+          docTex.getMimeType() || 'image/png',
+          effectiveRes,
+          effectiveFmt,
+          effectiveQuality
+        );
+        docTex.setImage(resizedBytes);
+        docTex.setMimeType(outMime);
+        compressedTexturesSizeBytes += resizedBytes.byteLength;
+      } catch (err) {
+        console.warn(`Error compressing texture index ${i}:`, err);
+        compressedTexturesSizeBytes += originalSize;
+      }
+    } else {
+      compressedTexturesSizeBytes += originalSize;
+    }
+  }
+
+  // 3. Mesh & Vertex Transformations Pipeline
   const transformSteps: Array<(doc: Document) => Promise<void> | void> = [];
 
-  // 2. Mesh Hierarchy Operations
   if (meshOpts.dedup) {
     transformSteps.push(dedup({}));
   }
@@ -280,9 +340,7 @@ export async function processGLB(
 
   if (meshOpts.flatten) {
     transformSteps.push((doc) => {
-      flatten({
-        cleanup: false
-      })(doc);
+      flatten({ cleanup: false })(doc);
     });
   }
 
@@ -294,7 +352,7 @@ export async function processGLB(
     transformSteps.push(instance({}));
   }
 
-  // 3. Vertex Quantization
+  // 4. Vertex Quantization
   transformSteps.push(
     quantize({
       quantizePosition: vertexQuantization.positions,
@@ -304,7 +362,7 @@ export async function processGLB(
     })
   );
 
-  // 4. Vertex Draco Compression
+  // 5. Vertex Draco Compression
   if (vertexCompression.type === 'draco') {
     transformSteps.push(
       draco({
@@ -317,6 +375,9 @@ export async function processGLB(
     );
   }
 
+  // 6. Prune unused elements
+  transformSteps.push(prune({}));
+
   // Execute Transformations
   for (const step of transformSteps) {
     try {
@@ -326,35 +387,14 @@ export async function processGLB(
     }
   }
 
-  // 5. Texture Processing & Resizing
-  const docTextures = doc.getRoot().listTextures();
-  for (let i = 0; i < docTextures.length; i++) {
-    const docTex = docTextures[i];
-    const matchingItem = texturesToCompress.find(
-      (t) => t.name === docTex.getName() || docTex.getName().includes(t.name)
-    );
-
-    if (matchingItem && matchingItem.selectedForCompression) {
-      const imgBytes = docTex.getImage();
-      if (imgBytes) {
-        const resizedBytes = await compressImageCanvas(
-          imgBytes,
-          docTex.getMimeType() || 'image/png',
-          textureSettings
-        );
-        docTex.setImage(resizedBytes);
-        if (textureSettings.format === 'WebP') {
-          docTex.setMimeType('image/webp');
-        }
-      }
-    }
-  }
-
-  // Output Compressed ArrayBuffer
+  // Output Compressed ArrayBuffer (exact slice)
   const compressedBytes = await io.writeBinary(doc);
-  const compressedBuffer = compressedBytes.buffer;
+  const compressedBuffer = compressedBytes.buffer.slice(
+    compressedBytes.byteOffset,
+    compressedBytes.byteOffset + compressedBytes.byteLength
+  );
 
-  // Calculate Metrics
+  // Calculate Compressed Vertex Count
   let newVertexCount = 0;
   doc.getRoot().listMeshes().forEach((m) => {
     m.listPrimitives().forEach((p) => {
@@ -370,23 +410,23 @@ export async function processGLB(
     metrics: {
       originalSizeBytes: buffer.byteLength,
       compressedSizeBytes: compressedBuffer.byteLength,
-      originalVertices: 0,
+      originalVertices: originalVertices,
       compressedVertices: newVertexCount,
-      originalTexturesSizeBytes: texturesToCompress.reduce((acc, t) => acc + t.sizeBytes, 0),
-      compressedTexturesSizeBytes: Math.round(
-        texturesToCompress.reduce((acc, t) => acc + t.sizeBytes, 0) * 0.45
-      ),
+      originalTexturesSizeBytes,
+      compressedTexturesSizeBytes,
       processingTimeMs
     }
   };
 }
 
-// Client-Side Canvas Image Resizer & Quality Transcoder
+// Client-Side High Performance Image Resizer & Quality Transcoder
 async function compressImageCanvas(
   bytes: Uint8Array,
   mimeType: string,
-  settings: TextureCompressionSettings
-): Promise<Uint8Array> {
+  targetRes: number,
+  targetFormat: string,
+  quality: number
+): Promise<{ data: Uint8Array; mimeType: string }> {
   return new Promise((resolve) => {
     const blob = new Blob([new Uint8Array(bytes)], { type: mimeType });
     const url = URL.createObjectURL(blob);
@@ -396,48 +436,73 @@ async function compressImageCanvas(
     img.onload = () => {
       URL.revokeObjectURL(url);
       const canvas = document.createElement('canvas');
-      const targetRes = settings.resolution;
 
-      let width = img.width;
-      let height = img.height;
-      if (width > targetRes || height > targetRes) {
-        if (width > height) {
-          height = Math.round((height * targetRes) / width);
-          width = targetRes;
+      const origW = img.naturalWidth || img.width || 512;
+      const origH = img.naturalHeight || img.height || 512;
+
+      // Scale proportionally to fit within targetRes
+      let newW = origW;
+      let newH = origH;
+
+      if (origW > targetRes || origH > targetRes) {
+        if (origW >= origH) {
+          newW = targetRes;
+          newH = Math.max(1, Math.round((origH * targetRes) / origW));
         } else {
-          width = Math.round((width * targetRes) / height);
-          height = targetRes;
+          newH = targetRes;
+          newW = Math.max(1, Math.round((origW * targetRes) / origH));
         }
       }
 
-      canvas.width = Math.max(1, width);
-      canvas.height = Math.max(1, height);
-      const ctx = canvas.getContext('2d')!;
+      canvas.width = Math.max(1, newW);
+      canvas.height = Math.max(1, newH);
+      const ctx = canvas.getContext('2d', { alpha: true });
 
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-      let outFormat = 'image/jpeg';
-      if (settings.format === 'WebP') {
-        outFormat = 'image/webp';
+      if (!ctx) {
+        resolve({ data: bytes, mimeType });
+        return;
       }
 
-      const qualityNormalized = Math.max(0.1, Math.min(1.0, settings.quality / 255));
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      let outMime = 'image/webp';
+      if (targetFormat === 'AVIF') {
+        outMime = 'image/avif';
+      } else if (targetFormat === 'WebP' || targetFormat === 'ETC1S' || targetFormat === 'UASTC') {
+        outMime = 'image/webp';
+      } else if (targetFormat === 'PNG') {
+        outMime = 'image/png';
+      } else {
+        outMime = 'image/jpeg';
+      }
+
+      // Quality normalized 0.05 - 1.0
+      const qualityNormalized = Math.max(0.05, Math.min(1.0, quality / 255));
 
       canvas.toBlob(
         async (resBlob) => {
           if (resBlob) {
             const arrBuffer = await resBlob.arrayBuffer();
-            resolve(new Uint8Array(arrBuffer));
+            resolve({
+              data: new Uint8Array(arrBuffer),
+              mimeType: resBlob.type || outMime
+            });
           } else {
-            resolve(bytes);
+            resolve({ data: bytes, mimeType });
           }
         },
-        outFormat,
+        outMime,
         qualityNormalized
       );
     };
 
-    img.onerror = () => resolve(bytes);
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve({ data: bytes, mimeType });
+    };
+
     img.src = url;
   });
 }

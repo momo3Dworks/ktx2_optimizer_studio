@@ -5,7 +5,7 @@ export const translations = {
     appTitle: 'KTX2 Optimizer Studio by Yeberson Orta',
     subtitle: 'Motor Web KTX2 + Draco',
     loadGlb: 'Cargar GLB',
-    sampleScene: 'Escena Vehículo',
+    sampleScene: 'Diorama Madera (Default)',
     processCompress: 'Procesar & Comprimir',
     processing: 'Procesando...',
     exportGlb: 'Exportar GLB',
@@ -13,6 +13,11 @@ export const translations = {
     viewCompressed: 'Comprimido',
     viewSplit: 'Split View',
     originalSize: 'Original',
+    statusVertices: 'Vértices',
+    statusTriangles: 'Triángulos',
+    statusTextures: 'Texturas',
+    statusMeshes: 'Meshes',
+    artistCredit: 'Modelo 3D: Wood Platform Diorama en Sketchfab',
 
     // Left Panel
     compressionOptions: 'Opciones de Compresión',
@@ -163,7 +168,7 @@ export const translations = {
     appTitle: 'KTX2 Optimizer Studio by Yeberson Orta',
     subtitle: 'KTX2 + Draco Web Engine',
     loadGlb: 'Load GLB',
-    sampleScene: 'Vehicle Scene',
+    sampleScene: 'Wood Platform Diorama (Default)',
     processCompress: 'Process & Compress',
     processing: 'Processing...',
     exportGlb: 'Export GLB',
@@ -171,6 +176,11 @@ export const translations = {
     viewCompressed: 'Compressed',
     viewSplit: 'Split View',
     originalSize: 'Original',
+    statusVertices: 'Vertices',
+    statusTriangles: 'Triangles',
+    statusTextures: 'Textures',
+    statusMeshes: 'Meshes',
+    artistCredit: '3D Model: Wood Platform Diorama on Sketchfab',
 
     // Left Panel
     compressionOptions: 'Compression Options',

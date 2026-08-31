@@ -76,3 +76,11 @@ export interface CompressionMetrics {
   compressedTexturesSizeBytes: number;
   processingTimeMs: number;
 }
+
+export interface ModelFileStats {
+  sizeBytes: number;
+  vertexCount: number;
+  faceCount: number;
+  textureCount: number;
+  meshCount: number;
+}

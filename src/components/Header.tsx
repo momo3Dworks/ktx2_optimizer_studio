@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Upload, Box, Zap, Download, Eye, Layers, Sparkles,
-  RefreshCw, FileCheck, BarChart3, Globe
+  RefreshCw, FileCheck, BarChart3, Globe, Triangle, Cpu, Image as ImageIcon
 } from 'lucide-react';
-import { ViewMode, CompressionMetrics } from '../types/gltf';
+import { ViewMode, CompressionMetrics, ModelFileStats } from '../types/gltf';
 import { Language, translations } from '../i18n/translations';
 
 interface HeaderProps {
@@ -14,6 +14,7 @@ interface HeaderProps {
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
   metrics: CompressionMetrics | null;
+  fileStats: ModelFileStats | null;
   hasCompressed: boolean;
   onFileUpload: (file: File) => void;
   onLoadSample: () => void;
@@ -24,18 +25,109 @@ interface HeaderProps {
   onOpenMobileActions?: () => void;
 }
 
+const DIORAMA_CREDITS_URL = 'https://sketchfab.com/3d-models/wood-platform-diorama-7a76349928ca43ea9981de345f709ec3';
+const DEFAULT_FILE_NAME = 'wood_platform_diorama.glb';
+
 export const Header: React.FC<HeaderProps> = ({
   lang, setLang, fileName, isProcessing, viewMode, setViewMode,
-  metrics, hasCompressed, onFileUpload, onLoadSample,
+  metrics, fileStats, hasCompressed, onFileUpload, onLoadSample,
   onCompress, onDownload, onOpenReportModal, isMobile, onOpenMobileActions
 }) => {
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const t = translations[lang];
 
-  const formatMB = (b: number) => (b / (1024 * 1024)).toFixed(1) + 'MB';
+  const formatMB = (b: number) =>
+    b >= 1024 * 1024 ? (b / (1024 * 1024)).toFixed(1) + ' MB'
+    : (b / 1024).toFixed(0) + ' KB';
+
   const pct = metrics
     ? (((metrics.originalSizeBytes - metrics.compressedSizeBytes) / metrics.originalSizeBytes) * 100).toFixed(1)
     : '0';
+
+  const isDefaultModel = fileName === DEFAULT_FILE_NAME;
+
+  /* ── Inline filename+stats chip ── */
+  const FileChip = () => {
+    if (!fileName) return null;
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '5px',
+          background: 'var(--bg-dark)',
+          padding: '2px 8px 2px 6px',
+          borderRadius: '6px',
+          border: '1px solid rgba(255,255,255,0.07)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 1px 3px rgba(0,0,0,0.4)',
+          maxWidth: isMobile ? '120px' : '260px',
+          flexShrink: 0
+        }}
+      >
+        {/* filename */}
+        <span
+          style={{
+            fontSize: '10px', color: 'var(--muted)',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            maxWidth: isMobile ? '80px' : '130px',
+          }}
+          title={fileName}
+        >
+          {fileName}
+        </span>
+
+        {/* Inline file stats — shown when parsed and not yet compressed */}
+        {!metrics && fileStats && !isMobile && (
+          <>
+            <span style={{ width: '1px', height: '11px', background: 'rgba(255,255,255,0.12)', flexShrink: 0 }} />
+            <span
+              style={{ fontSize: '9.5px', fontWeight: 700, color: 'var(--cyan)', whiteSpace: 'nowrap' }}
+              title={t.statusVertices}
+            >
+              {formatMB(fileStats.sizeBytes)}
+            </span>
+            <span style={{ width: '1px', height: '11px', background: 'rgba(255,255,255,0.10)', flexShrink: 0 }} />
+            <span style={{ fontSize: '9px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+              {(fileStats.vertexCount / 1000).toFixed(1)}k <strong style={{ color: '#e2e8f0' }}>V</strong>
+            </span>
+            <span style={{ fontSize: '9px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+              {(fileStats.faceCount / 1000).toFixed(1)}k <strong style={{ color: 'var(--gold)' }}>T</strong>
+            </span>
+            {fileStats.textureCount > 0 && (
+              <span style={{ fontSize: '9px', color: 'var(--amber)', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                {fileStats.textureCount} tex
+              </span>
+            )}
+          </>
+        )}
+
+        {/* Credits link for default model */}
+        {isDefaultModel && (
+          <a
+            href={DIORAMA_CREDITS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="View on Sketchfab — 3D model credits"
+            onClick={e => e.stopPropagation()}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              color: 'rgba(148, 163, 184, 0.5)',
+              textDecoration: 'none',
+              fontSize: '9px',
+              marginLeft: '2px',
+              flexShrink: 0,
+              transition: 'color 0.15s'
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--cyan)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(148, 163, 184, 0.5)')}
+          >
+            ©
+          </a>
+        )}
+      </div>
+    );
+  };
 
   return (
     <header
@@ -52,36 +144,40 @@ export const Header: React.FC<HeaderProps> = ({
         flexShrink: 0
       }}
     >
-      {/* ── Brand ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+      {/* ── Left: Brand + file actions ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, overflow: 'hidden' }}>
+        {/* Logo */}
         <div
           style={{
             background: 'linear-gradient(145deg, #22d3ee 0%, #0284c7 100%)',
-            width: '28px', height: '28px',
+            width: '28px', height: '28px', flexShrink: 0,
             borderRadius: '7px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: '#030e17',
-            boxShadow:
-              'inset 0 1px 0 rgba(255,255,255,0.55), 0 0 10px rgba(0,229,255,0.35), 0 2px 5px rgba(0,0,0,0.5)'
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.55), 0 0 10px rgba(0,229,255,0.35), 0 2px 5px rgba(0,0,0,0.5)'
           }}
         >
           <Zap size={16} strokeWidth={2.5} />
         </div>
-        <div>
-          <div
-            style={{
-              fontSize: '12px', fontWeight: 800, fontFamily: 'Outfit,sans-serif',
-              background: 'linear-gradient(90deg,#fff,#94a3b8)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-              lineHeight: 1.1, whiteSpace: 'nowrap'
-            }}
-          >
-            {isMobile ? 'KTX2 Studio' : 'KTX2 Optimizer Studio'}
+
+        {/* App title */}
+        {!isMobile && (
+          <div style={{ flexShrink: 0 }}>
+            <div
+              style={{
+                fontSize: '12px', fontWeight: 800, fontFamily: 'Outfit,sans-serif',
+                background: 'linear-gradient(90deg,#fff,#94a3b8)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                lineHeight: 1.1, whiteSpace: 'nowrap'
+              }}
+            >
+              KTX2 Optimizer Studio
+            </div>
+            <div style={{ fontSize: '9px', color: 'var(--muted)', lineHeight: 1, whiteSpace: 'nowrap' }}>
+              by Yeberson Orta
+            </div>
           </div>
-          <div style={{ fontSize: '9px', color: 'var(--muted)', lineHeight: 1, whiteSpace: 'nowrap' }}>
-            by Yeberson Orta
-          </div>
-        </div>
+        )}
 
         {/* Desktop-only file actions */}
         {!isMobile && (
@@ -98,26 +194,14 @@ export const Header: React.FC<HeaderProps> = ({
             <button className="btn-convex-secondary" onClick={onLoadSample}>
               <Box size={12} color="var(--gold)" /> {t.sampleScene}
             </button>
-
-            {fileName && (
-              <span
-                style={{
-                  fontSize: '10px', color: 'var(--muted)',
-                  background: 'var(--bg-dark)',
-                  padding: '3px 8px', borderRadius: '5px',
-                  border: '1px solid rgba(255,255,255,0.07)',
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 1px 3px rgba(0,0,0,0.4)',
-                  maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
-                }}
-              >
-                {fileName}
-              </span>
-            )}
           </>
         )}
+
+        {/* ── Filename chip with inline stats — always visible ── */}
+        <FileChip />
       </div>
 
-      {/* ── Centre: view-mode tabs (desktop only) ── */}
+      {/* ── Centre: view-mode tabs (desktop only, after compression) ── */}
       {!isMobile && hasCompressed && (
         <div className="tab-group-skeuo" style={{ width: '260px', flexShrink: 0 }}>
           <button
@@ -144,9 +228,9 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       )}
 
-      {/* ── Right: lang + metrics + actions ── */}
+      {/* ── Right: lang + comparative metrics + actions ── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-        {/* Language */}
+        {/* Language toggle */}
         <button
           className="btn-convex-secondary"
           onClick={() => setLang(lang === 'es' ? 'en' : 'es')}
@@ -156,7 +240,7 @@ export const Header: React.FC<HeaderProps> = ({
           {lang === 'es' ? 'ES' : 'EN'}
         </button>
 
-        {/* Metrics pill */}
+        {/* ── Compression result pill (replaces the file chip stats) ── */}
         {metrics && (
           <div
             onClick={onOpenReportModal}
@@ -169,6 +253,7 @@ export const Header: React.FC<HeaderProps> = ({
                 'inset 0 1px 0 rgba(255,255,255,0.12), 0 0 8px rgba(245,158,11,0.2), 0 2px 5px rgba(0,0,0,0.4)',
               cursor: 'pointer'
             }}
+            title={lang === 'es' ? 'Clic para ver reporte detallado' : 'Click to view detailed report'}
           >
             <FileCheck size={12} color="var(--amber)" />
             {!isMobile && (
@@ -193,7 +278,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         )}
 
-        {/* Desktop actions: Compress & Download */}
+        {/* Desktop: Compress + Download */}
         {!isMobile && (
           <>
             <button className="btn-convex" onClick={onCompress} disabled={isProcessing}>
@@ -202,7 +287,6 @@ export const Header: React.FC<HeaderProps> = ({
                 : <><Zap size={13} /> {t.processCompress}</>
               }
             </button>
-
             {hasCompressed && (
               <button className="btn-convex-warm" onClick={onDownload}>
                 <Download size={12} /> {t.exportGlb}
@@ -211,7 +295,7 @@ export const Header: React.FC<HeaderProps> = ({
           </>
         )}
 
-        {/* Mobile quick actions trigger */}
+        {/* Mobile: open actions sheet */}
         {isMobile && onOpenMobileActions && (
           <button
             className="btn-convex-secondary"

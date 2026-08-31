@@ -6,7 +6,7 @@ import { Viewport3D } from './components/Viewport3D';
 import { CompressionModal } from './components/CompressionModal';
 import { MobileDock } from './components/MobileDock';
 import { MobileActionsModal } from './components/MobileActionsModal';
-import { generateSampleGLB } from './services/sampleModelGenerator';
+import { GLBLoaderOverlay } from './components/GLBLoaderOverlay';
 import { parseGLBStructure, processGLB } from './services/gltfProcessor';
 import { Language } from './i18n/translations';
 import {
@@ -17,7 +17,8 @@ import {
   VertexCompressionState,
   TextureCompressionSettings,
   ViewMode,
-  CompressionMetrics
+  CompressionMetrics,
+  ModelFileStats
 } from './types/gltf';
 
 import { THEME_PALETTES } from './themes/palettes';
@@ -71,11 +72,20 @@ export const App: React.FC = () => {
   // GLB Model State
   const [originalBuffer, setOriginalBuffer] = useState<ArrayBuffer | null>(null);
   const [compressedBuffer, setCompressedBuffer] = useState<ArrayBuffer | null>(null);
-  const [fileName, setFileName] = useState<string>('sample_vehicle.glb');
+  const [fileName, setFileName] = useState<string>('wood_platform_diorama.glb');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<ViewMode>('original');
   const [metrics, setMetrics] = useState<CompressionMetrics | null>(null);
+  const [fileStats, setFileStats] = useState<ModelFileStats | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
+
+  // Loader overlay state
+  type LoaderPhase = 'idle' | 'fetching' | 'parsing' | 'done' | 'error';
+  const [loaderPhase, setLoaderPhase] = useState<LoaderPhase>('idle');
+  const [loaderPct, setLoaderPct] = useState(0);
+  const [loaderLabel, setLoaderLabel] = useState('');
+  const [loaderError, setLoaderError] = useState<string | undefined>();
+  const [loaderFileName, setLoaderFileName] = useState('');
 
   // Scene Tree & Protection State
   const [nodes, setNodes] = useState<SceneNodeInfo[]>([]);
@@ -119,34 +129,75 @@ export const App: React.FC = () => {
     effort: 2
   });
 
-  // Load Procedural Sample Model on Mount
+  // Load Default Wood Platform Diorama on Mount
   useEffect(() => {
     loadSampleModel();
   }, []);
 
   const loadSampleModel = async () => {
+    const glbPath = '/assets/wood_platform_diorama.glb';
+    const name = 'wood_platform_diorama.glb';
+    setLoaderFileName(name);
+    setLoaderPhase('fetching');
+    setLoaderPct(0);
+    setLoaderError(undefined);
+    setIsProcessing(true);
     try {
-      setIsProcessing(true);
-      const buffer = await generateSampleGLB();
-      setFileName('sample_vehicle.glb');
-      await loadGLBBuffer(buffer);
-    } catch (err) {
-      console.error('Error generating sample GLB:', err);
+      // Stream with progress
+      const response = await fetch(glbPath);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const contentLength = Number(response.headers.get('Content-Length') ?? 0);
+      const reader = response.body!.getReader();
+      const chunks: Uint8Array[] = [];
+      let received = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        received += value.length;
+        if (contentLength > 0) setLoaderPct(Math.min(99, (received / contentLength) * 100));
+      }
+      setLoaderPct(100);
+      // Concat all chunks
+      const totalLen = chunks.reduce((s, c) => s + c.length, 0);
+      const buffer = new ArrayBuffer(totalLen);
+      const view = new Uint8Array(buffer);
+      let offset = 0;
+      for (const chunk of chunks) { view.set(chunk, offset); offset += chunk.length; }
+
+      setFileName(name);
+      setLoaderPhase('parsing');
+      await loadGLBBuffer(buffer, totalLen);
+      setLoaderPhase('done');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('Error loading default GLB:', msg);
+      setLoaderPhase('error');
+      setLoaderError(msg);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const loadGLBBuffer = async (buffer: ArrayBuffer) => {
+  const loadGLBBuffer = async (buffer: ArrayBuffer, fileSizeBytes?: number) => {
     setOriginalBuffer(buffer);
     setCompressedBuffer(null);
     setViewMode('original');
     setMetrics(null);
     setIsReportModalOpen(false);
 
-    const { nodes: parsedNodes, textures: parsedTextures } = await parseGLBStructure(buffer);
+    const { nodes: parsedNodes, textures: parsedTextures, vertexCount, faceCount, meshCount } = await parseGLBStructure(buffer);
     setNodes(parsedNodes);
     setTextures(parsedTextures);
+
+    // Build file stats for header display
+    setFileStats({
+      sizeBytes: fileSizeBytes ?? buffer.byteLength,
+      vertexCount,
+      faceCount,
+      textureCount: parsedTextures.length,
+      meshCount
+    });
 
     // Default protect empties, splines, cameras, lights
     const initialProtected = new Set<string>();
@@ -165,12 +216,18 @@ export const App: React.FC = () => {
   const handleFileUpload = async (file: File) => {
     setIsProcessing(true);
     setFileName(file.name);
+    setLoaderFileName(file.name);
+    setLoaderPhase('parsing');
+    setLoaderError(undefined);
     try {
       const buffer = await file.arrayBuffer();
-      await loadGLBBuffer(buffer);
-    } catch (err) {
-      console.error('Error reading file:', err);
-      alert(lang === 'es' ? 'Error al leer el archivo GLB / GLTF.' : 'Error reading GLB / GLTF file.');
+      await loadGLBBuffer(buffer, file.size);
+      setLoaderPhase('done');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('Error reading file:', msg);
+      setLoaderPhase('error');
+      setLoaderError(msg);
     } finally {
       setIsProcessing(false);
     }
@@ -238,6 +295,7 @@ export const App: React.FC = () => {
         viewMode={viewMode}
         setViewMode={setViewMode}
         metrics={metrics}
+        fileStats={fileStats}
         hasCompressed={!!compressedBuffer}
         onFileUpload={handleFileUpload}
         onLoadSample={loadSampleModel}
@@ -279,14 +337,27 @@ export const App: React.FC = () => {
         )}
 
         {/* 3D Viewport (Full width on mobile) */}
-        <Viewport3D
-          lang={lang}
-          originalBuffer={originalBuffer}
-          compressedBuffer={compressedBuffer}
-          viewMode={viewMode}
-          selectedNodeName={selectedNodeName}
-          highlightedObjectNames={highlightedObjectNames}
-        />
+        <div style={{ flex: 1, position: 'relative', display: 'flex', minWidth: 0 }}>
+          <Viewport3D
+            lang={lang}
+            originalBuffer={originalBuffer}
+            compressedBuffer={compressedBuffer}
+            viewMode={viewMode}
+            selectedNodeName={selectedNodeName}
+            highlightedObjectNames={highlightedObjectNames}
+            fileName={fileName}
+          />
+          {/* ── GLB Loader Overlay ── */}
+          <GLBLoaderOverlay
+            phase={loaderPhase}
+            fetchPct={loaderPct}
+            label={loaderLabel}
+            errorMsg={loaderError}
+            fileName={loaderFileName}
+            lang={lang}
+            onRetry={loaderPhase === 'error' ? loadSampleModel : undefined}
+          />
+        </div>
 
         {/* Desktop RightPanel */}
         {!isMobile && (
