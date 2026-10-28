@@ -72,6 +72,20 @@ function ModelViewer({
       buffer,
       '',
       (gltf) => {
+        // Boost visibility of splines and line objects
+        gltf.scene.traverse((obj) => {
+          if (obj instanceof THREE.Line || (obj as any).isLine || (obj as any).isLineSegments) {
+            const line = obj as THREE.Line;
+            if (!line.userData.originalMaterial) {
+              line.userData.originalMaterial = line.material;
+            }
+            line.material = new THREE.LineBasicMaterial({
+              color: 0xec4899,
+              linewidth: 2,
+              depthTest: true,
+            });
+          }
+        });
         setGltfScene(gltf.scene);
         setClips(gltf.animations ?? []);
         onLoaded?.(gltf.animations ?? []);
@@ -85,9 +99,11 @@ function ModelViewer({
   useEffect(() => {
     if (!gltfScene) return;
     gltfScene.traverse((obj) => {
+      const isSelected = selectedNodeName === obj.name;
+      const isHighlighted = highlightedObjectNames.includes(obj.name);
+
+      // 1. Mesh selection
       if (obj instanceof THREE.Mesh) {
-        const isSelected = selectedNodeName === obj.name;
-        const isHighlighted = highlightedObjectNames.includes(obj.name);
         if (isSelected || isHighlighted) {
           if (!obj.userData.originalMaterial) obj.userData.originalMaterial = obj.material;
           obj.material = new THREE.MeshStandardMaterial({
@@ -99,6 +115,45 @@ function ModelViewer({
         } else if (obj.userData.originalMaterial) {
           obj.material = obj.userData.originalMaterial;
           delete obj.userData.originalMaterial;
+        }
+      }
+      // 2. Line / LineSegments selection (Splines!)
+      else if (obj instanceof THREE.Line || (obj as any).isLine || (obj as any).isLineSegments) {
+        const line = obj as THREE.Line;
+        if (!line.userData.originalMaterial) {
+          line.userData.originalMaterial = line.material;
+        }
+        if (isSelected || isHighlighted) {
+          line.material = new THREE.LineBasicMaterial({
+            color: isSelected ? 0x00f2fe : 0xfbbf24,
+            linewidth: 3,
+            depthTest: false,
+          });
+          line.renderOrder = 999;
+        } else {
+          line.material = line.userData.originalMaterial || new THREE.LineBasicMaterial({
+            color: 0xec4899,
+            linewidth: 2,
+            depthTest: true,
+          });
+          line.renderOrder = 0;
+        }
+      }
+      // 3. Empty node selection (Object3D / Group with no mesh/line children)
+      else if (obj instanceof THREE.Group || obj instanceof THREE.Object3D) {
+        const isLeafOrEmpty = obj.children.length === 0 || !obj.children.some(c => c instanceof THREE.Mesh || (c as any).isLine);
+        if (isLeafOrEmpty) {
+          const existingHelper = obj.getObjectByName('__empty_helper__');
+          if (isSelected || isHighlighted) {
+            if (!existingHelper) {
+              const helper = new THREE.AxesHelper(0.8);
+              helper.name = '__empty_helper__';
+              helper.renderOrder = 999;
+              obj.add(helper);
+            }
+          } else if (existingHelper) {
+            obj.remove(existingHelper);
+          }
         }
       }
     });
@@ -337,7 +392,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
           <ContactShadows position={[0, -0.01, 0]} opacity={0.6} scale={10} blur={2} far={4} />
           <Grid infiniteGrid fadeDistance={25} cellColor="#1e293b" sectionColor="#00f2fe" />
           <OrbitControls makeDefault enableDamping dampingFactor={0.05} />
-          <Perf position="top-right" showGauge={true} minimal={true} />
+          <Perf position="top-right" showGauge={true} />
         </Canvas>
       )}
 

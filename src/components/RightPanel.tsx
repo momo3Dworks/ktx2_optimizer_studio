@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { SceneNodeInfo } from '../types/gltf';
 import { Language, translations } from '../i18n/translations';
+import { BlenderPanel } from './BlenderPanel';
 
 interface RightPanelProps {
   lang: Language;
@@ -13,12 +14,13 @@ interface RightPanelProps {
   toggleNodeProtection: (nodeName: string) => void;
   selectedNodeName: string | null;
   setSelectedNodeName: (name: string | null) => void;
+  onGLBReceived?: (buffer: ArrayBuffer, fileName: string) => void;
   onCloseMobile?: () => void;
 }
 
 export const RightPanel: React.FC<RightPanelProps> = ({
   lang, nodes, protectedNodeIds, toggleNodeProtection,
-  selectedNodeName, setSelectedNodeName, onCloseMobile
+  selectedNodeName, setSelectedNodeName, onGLBReceived, onCloseMobile
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const t = translations[lang];
@@ -46,7 +48,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
     const accentColor = isSpline ? '#f472b6' : 'var(--amber)';
 
     return (
-      <div key={node.id}>
+      <div key={`${node.id}-${level}`}>
         <div
           className="skeuo-card"
           onClick={() => setSelectedNodeName(node.name)}
@@ -206,16 +208,24 @@ export const RightPanel: React.FC<RightPanelProps> = ({
         }
       </div>
 
+      {/* ── Blender Live Bridge ── */}
+      <div style={{ padding: '0 4px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+        <BlenderPanel
+          lang={lang}
+          onGLBReceived={onGLBReceived || (() => {})}
+        />
+      </div>
+
       {/* Footer note */}
       <div style={{
-        padding: '7px 10px',
+        padding: '6px 10px',
         background: 'var(--bg-panel)',
-        borderTop: '1px solid rgba(255,255,255,0.07)',
-        fontSize: '9.5px', color: 'var(--muted)',
+        borderTop: '1px solid rgba(255,255,255,0.05)',
+        fontSize: '9px', color: 'var(--muted)',
         display: 'flex', alignItems: 'center', gap: '6px'
       }}>
-        <ShieldCheck size={13} color="var(--amber)" style={{ flexShrink: 0 }} />
-        <span style={{ lineHeight: 1.4 }}>{t.protectionNote}</span>
+        <ShieldCheck size={12} color="var(--amber)" style={{ flexShrink: 0 }} />
+        <span style={{ lineHeight: 1.3 }}>{t.protectionNote}</span>
       </div>
     </aside>
   );

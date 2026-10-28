@@ -233,6 +233,25 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleGLBFromBlender = async (buffer: ArrayBuffer, name: string) => {
+    setIsProcessing(true);
+    setFileName(name);
+    setLoaderFileName(name);
+    setLoaderPhase('parsing');
+    setLoaderError(undefined);
+    try {
+      await loadGLBBuffer(buffer, buffer.byteLength);
+      setLoaderPhase('done');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('Error loading Blender GLB:', msg);
+      setLoaderPhase('error');
+      setLoaderError(msg);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const toggleNodeProtection = (nodeName: string) => {
     setProtectedNodeIds((prev) => {
       const next = new Set(prev);
@@ -368,6 +387,7 @@ export const App: React.FC = () => {
             toggleNodeProtection={toggleNodeProtection}
             selectedNodeName={selectedNodeName}
             setSelectedNodeName={setSelectedNodeName}
+            onGLBReceived={handleGLBFromBlender}
           />
         )}
 
@@ -465,6 +485,10 @@ export const App: React.FC = () => {
                 toggleNodeProtection={toggleNodeProtection}
                 selectedNodeName={selectedNodeName}
                 setSelectedNodeName={setSelectedNodeName}
+                onGLBReceived={(buffer, name) => {
+                  handleGLBFromBlender(buffer, name);
+                  setMobileDrawer('none');
+                }}
                 onCloseMobile={() => setMobileDrawer('none')}
               />
             </div>

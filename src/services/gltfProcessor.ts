@@ -99,9 +99,16 @@ export async function parseGLBStructure(buffer: ArrayBuffer): Promise<{
     const isSplineByName =
       nodeName.includes('spline') ||
       nodeName.includes('curve') ||
+      nodeName.includes('curva') ||
       nodeName.includes('path') ||
+      nodeName.includes('pista') ||
+      nodeName.includes('line') ||
+      nodeName.includes('linea') ||
+      nodeName.includes('cable') ||
+      nodeName.includes('guia') ||
       nodeName.includes('track') ||
-      nodeName.includes('trajectory');
+      nodeName.includes('trajectory') ||
+      nodeName.includes('trayectoria');
 
     // Helper to determine node type based on mesh presence and naming heuristics
     const detectNodeType = (hasMesh: boolean, isSplineByName: boolean, isLinePrimitive: boolean): SceneNodeInfo['type'] => {
@@ -132,10 +139,11 @@ export async function parseGLBStructure(buffer: ArrayBuffer): Promise<{
         if (posAttr) {
           vCount += posAttr.getCount();
           const indices = prim.getIndices();
+          const divisor = isLinePrimitive ? 2 : 3;
           if (indices) {
-            fCount += indices.getCount() / 3;
+            fCount += indices.getCount() / divisor;
           } else {
-            fCount += posAttr.getCount() / 3;
+            fCount += posAttr.getCount() / divisor;
           }
         }
       });
@@ -154,7 +162,7 @@ export async function parseGLBStructure(buffer: ArrayBuffer): Promise<{
     const childrenNodes = node.listChildren().map(buildNodeTree);
 
     return {
-      id: node.getName() || `Node_${Math.random().toString(36).substring(2, 7)}`,
+      id: `${node.getName() || 'Node'}_${Math.random().toString(36).substring(2, 7)}`,
       name: node.getName() || `Unnamed_${type}`,
       type,
       protected: type === 'camera' || type === 'empty' || type === 'spline' || type === 'light',
@@ -363,7 +371,25 @@ export async function processGLB(
   }
 
   if (meshOpts.join) {
-    transformSteps.push(join({}));
+    transformSteps.push(
+      join({
+        filter: (node) => {
+          // Never join protected nodes (empties, splines, cameras, lights)
+          if (node.getExtras()?.isProtected) return false;
+          // Also protect line primitives from being merged into standard triangle meshes
+          const mesh = node.getMesh();
+          if (mesh) {
+            const hasLines = mesh.listPrimitives().some((p) => {
+              const m = p.getMode();
+              return m === 1 || m === 2 || m === 3;
+            });
+            if (hasLines) return false;
+          }
+          return true;
+        },
+        cleanup: false,
+      })
+    );
   }
 
   if (meshOpts.instance) {
@@ -393,8 +419,20 @@ export async function processGLB(
     );
   }
 
-  // 6. Prune unused elements
-  transformSteps.push(prune({}));
+  // 6. Prune unused elements (keep leaves and extras to preserve empties, splines and hierarchies)
+  transformSteps.push(prune({ keepLeaves: true, keepExtras: true }));
+
+  // Preserve protected nodes (empties, splines, cameras, lights) after transformations
+  // Capture nodes marked as protected before transforms
+  const protectedOriginalNodes = root.listNodes()
+    .filter((node) => node.getExtras()?.isProtected)
+    .map((node) => ({
+      name: node.getName(),
+      matrix: node.getWorldMatrix(),
+      extras: node.getExtras(),
+      mesh: node.getMesh(),
+      camera: node.getCamera(),
+    }));
 
   // Execute Transformations
   for (const step of transformSteps) {
@@ -402,6 +440,30 @@ export async function processGLB(
       await step(doc);
     } catch (err) {
       console.warn('Transform step note:', err);
+    }
+  }
+
+  // After all transforms (including prune), re-add any protected nodes that were removed
+  const existingNames = new Set(doc.getRoot().listNodes().map((n) => n.getName()));
+  for (const backup of protectedOriginalNodes) {
+    if (!backup.name || existingNames.has(backup.name)) continue;
+    // Create the node directly in world space
+    const newNode = doc.createNode(backup.name)
+      .setMatrix(backup.matrix)
+      .setExtras(backup.extras);
+    if (backup.mesh) {
+      newNode.setMesh(backup.mesh);
+    }
+    if (backup.camera) {
+      newNode.setCamera(backup.camera);
+    }
+      
+    const scenes = doc.getRoot().listScenes();
+    if (scenes.length > 0) {
+      scenes[0].addChild(newNode);
+    } else {
+      const newScene = doc.createScene('RecoveredProtected');
+      newScene.addChild(newNode);
     }
   }
 
